@@ -1,41 +1,54 @@
 Package postfix;
 
+Helpers
+ letter = [['a' .. 'z'] + ['A' .. 'Z']];
+ digit = ['0' .. '9'];
+ period = '.';
 
 Tokens
- number = ['0' .. '9']+;
+ number = digit+;
+ fnumber = digit* period digit*;
+ word = letter (letter | digit)+;
+ print = 'print';
+ comma = ',';
  plus = '+';
  minus = '-';
- mult = '*';
+ assign = '=';
+ l_br = '(';
+ r_br = ')';
  div = '/';
- mod = '%';
- l_par = '(';
- r_par = ')';
- nln = 13 | 10;
+ mul = '*';
  blank = (' ' | 13 | 10)+;
-
 
 Ignored Tokens
  blank;
 
-
-	
-
 Productions
- finexpr = expr nln;
- expr =
-  {factor} factor |
-  {plus} expr plus factor |
-  {minus} expr minus factor;
+ statement = printer;
+//  {assignment} assignment |
+//  {printer} printer;
 
+ assignment = name assign expr;
 
-factor =
- {term} term |
- {mult} factor mult term |
- {div} factor div term |
- {mod} factor mod term;
+ printer = print expr_list;
 
+ expr_list = expr |
+  {several} expr_list comma expr;
 
-term =
- {number} number |
- {expr} l_par expr r_par;
+ expr = factor |
+  {sum} expr plus factor |
+  {sub} expr minus factor ;
+
+ factor = unit |
+  {mul} factor mul unit |
+  {div} factor div unit;
+ 
+ unit = val |
+  {nested} l_br expr r_br;
+
+ val = name |
+  {const} number |
+  {fconst} fnumber;
+
+ name = word;
  
