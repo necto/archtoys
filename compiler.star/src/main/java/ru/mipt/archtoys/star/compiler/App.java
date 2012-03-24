@@ -1,27 +1,38 @@
 package ru.mipt.archtoys.star.compiler;
 
+import gramm.lexer.Lexer;
+import gramm.node.Start;
+import gramm.node.Token;
+import gramm.node.TNumber;
+import gramm.parser.Parser;
+import gramm.parser.ParserException;
 import java.io.PushbackReader;
 import java.io.StringReader;
-import postfix.lexer.Lexer;
-import postfix.node.Start;
-import postfix.parser.Parser;
-import postfix.parser.ParserException;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
+	public static Lexer initLexer (String input)
+	{
+		Lexer lex = new Lexer (new PushbackReader (new StringReader (input)));
+		return lex;
+	}
+	
     public static void main( String[] args )
     {
 		Parser p = new Parser (
-				new Lexer ( 
+				new Lexer( 
 				new PushbackReader (
-				new StringReader(//"var = etty - 56* (6 / 5 - 3.3) + a4a + gi \n"))));// +
-								 "print 1"))));
-		try {//Why doesn't this ^^^^ letter is not "first_letter" token
+				new StringReader("var = etty - 56* (6 / 5 - 3.3) + a4a + gi \n" +
+								 "print var - 1"))));
+		
+		
+		try {
 		Start tree = p.parse();
+		Lexer lex = initLexer("1234");
+		Token tok = lex.next();
+		System.out.println (tok);
+		System.out.println (tok.getClass());
+		System.out.println (tok.getClass().equals(TNumber.class));
 		} catch (ParserException e)
 		{
 			System.out.print(e.getToken());

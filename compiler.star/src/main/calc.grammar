@@ -1,4 +1,4 @@
-Package postfix;
+Package gramm;
 
 Helpers
  letter = [['a' .. 'z'] + ['A' .. 'Z']];
@@ -6,10 +6,10 @@ Helpers
  period = '.';
 
 Tokens
+ print = 'print';
  number = digit+;
  fnumber = digit* period digit*;
- word = letter (letter | digit)+;
- print = 'print';
+ word = letter (letter | digit)*;
  comma = ',';
  plus = '+';
  minus = '-';
@@ -18,15 +18,20 @@ Tokens
  r_br = ')';
  div = '/';
  mul = '*';
- blank = (' ' | 13 | 10)+;
+ nln = 10;
+ blank = ' '+;
+// blank = (' ' | 13 | 10)+;
 
 Ignored Tokens
  blank;
 
 Productions
- statement = printer;
-//  {assignment} assignment |
-//  {printer} printer;
+ program = statement |
+  {progn} program nln statement;
+
+ statement = 
+  {assignment} assignment |
+  {printer} printer;
 
  assignment = name assign expr;
 
