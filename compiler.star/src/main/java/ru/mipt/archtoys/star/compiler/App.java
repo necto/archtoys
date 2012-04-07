@@ -1,6 +1,7 @@
 package ru.mipt.archtoys.star.compiler;
 
 import gramm.lexer.Lexer;
+import gramm.node.Node;
 import gramm.node.Start;
 import gramm.node.Token;
 import gramm.node.TNumber;
@@ -8,6 +9,7 @@ import gramm.parser.Parser;
 import gramm.parser.ParserException;
 import java.io.PushbackReader;
 import java.io.StringReader;
+import java.util.Map;
 
 public class App 
 {
@@ -33,10 +35,12 @@ public class App
 		try {
 		Start tree = p.parse();
 		MemTable mem = new MemTable();
+		TypeDeriver td = new TypeDeriver(mem);
 		VarsExtractor vv = new VarsExtractor(mem);
-		Compiler c = new Compiler(mem);
+		Compiler c = new Compiler(mem, td);
 		
 		tree.apply(vv);
+		tree.apply(td);
 		tree.apply(c);
 		System.out.println (mem.table);
 		System.out.println (c.asm);
@@ -54,6 +58,5 @@ public class App
 		{
 			System.out.println(e.getMessage());
 		}
-        System.out.println( "Hello World!" );
     }
 }

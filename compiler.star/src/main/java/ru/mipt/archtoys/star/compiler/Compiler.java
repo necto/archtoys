@@ -16,10 +16,12 @@ public class Compiler extends DepthFirstAdapter
 	public String asm = "";
 	
 	private MemTable vars;
+	private TypeDeriver types;
 	
-	public Compiler (MemTable v)
+	public Compiler (MemTable v, TypeDeriver types)
 	{
-		vars = v;
+		this.vars = v;
+		this.types = types;
 	}
 	
 	private void pushCommand (String cmd)
@@ -98,24 +100,22 @@ public class Compiler extends DepthFirstAdapter
         pushCommand("chs");
     }
 	
-	private char getCharType (String name)
+	private char getCharType (Node n)
 	{
-		return vars.getType(name).sign();
+		return types.getType(n).sign();
 	}
 	
 	@Override
 	public void outAVarName (AVarName node)
 	{
 		String name = node.getWord().getText();
-		char type = getCharType(name);
-		
 		pushCommand("lda", vars.getAdress(name));
 	}
 	
 	@Override
 	public void outAVal (AVal node)
 	{
-		pushCommand("lds?");
+		pushCommand("lds" + getCharType(node));
 	}
 
     @Override
@@ -128,7 +128,12 @@ public class Compiler extends DepthFirstAdapter
             node.getExpr().apply(this);
         }
 		
-		pushCommand("st?");
+        if(node.getVariable() != null)
+        {
+            node.getVariable().apply(this);
+        }
+		
+		pushCommand("st" + getCharType(node));
         outAAssignment(node);
     }
 	
