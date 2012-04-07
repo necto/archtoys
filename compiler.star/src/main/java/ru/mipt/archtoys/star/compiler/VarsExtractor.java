@@ -6,6 +6,7 @@ package ru.mipt.archtoys.star.compiler;
 
 import gramm.analysis.DepthFirstAdapter;
 import gramm.node.AName;
+import gramm.node.AVarName;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class VarsExtractor extends DepthFirstAdapter
 	}
 	
 	@Override
-	public void outAName (AName node)
+	public void outAVarName (AVarName node)
 	{
 		handleVar (node.getWord().getText());
 	}

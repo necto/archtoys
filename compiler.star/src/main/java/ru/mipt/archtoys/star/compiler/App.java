@@ -25,7 +25,8 @@ public class App
 //				new StringReader("var = etty - 56* (6 / 5 - 3.3) + a4a + gi \n" +
 //								 "print var - 1\n" +
 //								 "itar = i - k + nana"))));
-				new StringReader ("var = 3 + frac - 8*(k - 5/6)"))));
+//				new StringReader ("var = 3 + frac - 8*(k mod 3 - 5/6)\n print var"))));
+				new StringReader ("var = -sin(-5)"))));
 		
 		
 		try {

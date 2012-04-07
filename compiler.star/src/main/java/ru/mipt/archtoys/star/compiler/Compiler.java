@@ -80,7 +80,19 @@ public class Compiler extends DepthFirstAdapter
     }
 	
 	@Override
-	public void outAName (AName node)
+    public void outAModFactor (AModFactor node)
+    {
+		pushCommand("rem");
+    }
+	
+	@Override
+    public void outAInvertedUnit(AInvertedUnit node)
+    {
+        pushCommand("chs");
+    }
+	
+	@Override
+	public void outAVarName (AVarName node)
 	{
 		String name = node.getWord().getText();
 		char type = vars.getType(name) == vars.INTEGER ? 'i' : 'd';
@@ -99,14 +111,57 @@ public class Compiler extends DepthFirstAdapter
             node.getExpr().apply(this);
         }
 		
-        if(node.getName() != null)
+        if(node.getVarName() != null)
         {
-			String name = ((AName) node.getName()).getWord().getText();
+			String name = ((AVarName) node.getVarName()).getWord().getText();
 			char type = vars.getType(name) == vars.INTEGER ? 'i' : 'd';
 			
 			pushCommand("lda", vars.getAdress(name));
 			pushCommand("st" + type);
         }
+		else throw new RuntimeException("The value must be assigned to" +
+										"some variable [" +
+										node.getAssign().getLine() + ", " +
+										node.getAssign().getPos() + "]\n");
         outAAssignment(node);
+    }
+	
+    @Override
+    public void caseAPrinter(APrinter node)
+    {
+        inAPrinter(node);
+		pushCommand("ms");
+
+        if(node.getExprList() != null)
+        {
+            node.getExprList().apply(this);
+        }
+		
+		pushCommand("ldci", "\'print procedure adress\'");
+		pushCommand("call");
+        outAPrinter(node);
+    }
+	
+    @Override
+    public void caseACallUnit(ACallUnit node)
+    {
+        inACallUnit(node);
+		pushCommand("ms");
+		
+        if(node.getUnit() != null)
+        {
+            node.getUnit().apply(this);
+        }
+		
+        if(node.getFunName() != null)
+        {
+			String name = ((AFunName) node.getFunName()).getWord().getText();
+			pushCommand("ldci", "\'adress of " + name + "\'");
+        }
+		else throw new RuntimeException("Here expected some function name [" +
+										node.getLBr().getLine() + ", " +
+										node.getLBr().getPos() + "]\n");
+		pushCommand("call");
+        outACallUnit(node);
     }
 }
