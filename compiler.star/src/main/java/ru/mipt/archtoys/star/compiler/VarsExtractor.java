@@ -5,10 +5,9 @@
 package ru.mipt.archtoys.star.compiler;
 
 import gramm.analysis.DepthFirstAdapter;
-import gramm.node.AName;
+import gramm.node.AArrName;
+import gramm.node.AIndexVariable;
 import gramm.node.AVarName;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -16,48 +15,36 @@ import java.util.Map;
  */
 public class VarsExtractor extends DepthFirstAdapter
 {
-	final public int INTEGER = 0;
-	final public int FLOAT = 1;
-	
-	public Map<String, Integer> memoryTable = new HashMap<String, Integer>();
-	private int lastAdress = 0;
-	
-	private Integer chooseNextAdress (int type)
+	private MemTable table;
+
+	public VarsExtractor (MemTable table)
 	{
-		switch (type)
-		{
-			case INTEGER:
-				return lastAdress += 1;
-			case FLOAT:
-				return lastAdress += 2;
-		}
-		return 0;
+		this.table = table;
 	}
 	
-	public int getType (String name)
+	private MemTable.Type induceType (String name)
 	{
 		if ("ijklmn".indexOf( name.charAt(0)) != -1)
-			return INTEGER;
-		return FLOAT;
+			return MemTable.Type.INTEGER;
+		return MemTable.Type.FLOAT;
 	}
 	
-	public Integer getAdress (String name)
+	private void handleVar (String name, boolean arrayp)
 	{
-		return memoryTable.get(name);
-	}
-	
-	private void handleVar (String name)
-	{
-		if (memoryTable.containsKey(name))
-		{
-		}
-		else
-			memoryTable.put (name, chooseNextAdress (getType(name)));
+		if (!table.hasVar(name))
+			table.registerVar(name, induceType(name), arrayp);
 	}
 	
 	@Override
 	public void outAVarName (AVarName node)
 	{
-		handleVar (node.getWord().getText());
+		handleVar (node.getWord().getText(), false);
 	}
+	
+	@Override
+	public void outAIndexVariable(AIndexVariable node)
+    {
+		//TODO: support multidimensional arrays
+		handleVar (((AArrName) (node.getArrName())).getWord().getText(), true);
+    }
 }

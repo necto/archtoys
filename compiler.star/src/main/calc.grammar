@@ -16,7 +16,9 @@ Tokens
  minus = '-';
  assign = '=';
  l_br = '(';
+ lsq_br = '[';
  r_br = ')';
+ rsq_br = ']';
  div = '/';
  mul = '*';
  nln = 10;
@@ -34,7 +36,7 @@ Productions
   {assignment} assignment |
   {printer} printer;
 
- assignment = var_name assign expr;
+ assignment = variable assign expr;
 
  printer = print expr_list;
 
@@ -57,11 +59,16 @@ Productions
  operand = val |
   {nested} l_br expr r_br;
 
- val = var_name |
+ val = variable |
   {const} number |
   {fconst} fnumber;
+
+ variable = var_name |
+  {index} arr_name lsq_br expr rsq_br;
 
  var_name = word;
 
  fun_name = word;
+
+ arr_name = word;
  

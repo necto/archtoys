@@ -15,9 +15,9 @@ public class Compiler extends DepthFirstAdapter
 {
 	public String asm = "";
 	
-	private VarsExtractor vars;
+	private MemTable vars;
 	
-	public Compiler (VarsExtractor v)
+	public Compiler (MemTable v)
 	{
 		vars = v;
 	}
@@ -41,6 +41,13 @@ public class Compiler extends DepthFirstAdapter
 	public void defaultIn(Node node)
     {
         System.out.println (node.getClass().toString() + " " + node.toString());
+    }
+	
+	@Override
+    public void inStart(Start node)
+    {
+        defaultIn(node);
+		pushCommand("alloc", vars.getMemSize());
     }
 
 	@Override
@@ -91,14 +98,24 @@ public class Compiler extends DepthFirstAdapter
         pushCommand("chs");
     }
 	
+	private char getCharType (String name)
+	{
+		return vars.getType(name).sign();
+	}
+	
 	@Override
 	public void outAVarName (AVarName node)
 	{
 		String name = node.getWord().getText();
-		char type = vars.getType(name) == vars.INTEGER ? 'i' : 'd';
+		char type = getCharType(name);
 		
 		pushCommand("lda", vars.getAdress(name));
-		pushCommand("ld" + type);
+	}
+	
+	@Override
+	public void outAVal (AVal node)
+	{
+		pushCommand("lds?");
 	}
 
     @Override
@@ -111,18 +128,7 @@ public class Compiler extends DepthFirstAdapter
             node.getExpr().apply(this);
         }
 		
-        if(node.getVarName() != null)
-        {
-			String name = ((AVarName) node.getVarName()).getWord().getText();
-			char type = vars.getType(name) == vars.INTEGER ? 'i' : 'd';
-			
-			pushCommand("lda", vars.getAdress(name));
-			pushCommand("st" + type);
-        }
-		else throw new RuntimeException("The value must be assigned to" +
-										"some variable [" +
-										node.getAssign().getLine() + ", " +
-										node.getAssign().getPos() + "]\n");
+		pushCommand("st?");
         outAAssignment(node);
     }
 	
@@ -164,4 +170,62 @@ public class Compiler extends DepthFirstAdapter
 		pushCommand("call");
         outACallUnit(node);
     }
+	
+    @Override
+    public void caseAIndexVariable(AIndexVariable node)
+    {
+        inAIndexVariable(node);
+        if(node.getArrName() != null)
+        {
+            node.getArrName().apply(this);
+        }
+        if(node.getLsqBr() != null)
+        {
+            node.getLsqBr().apply(this);
+        }
+        if(node.getExpr() != null)
+        {
+            node.getExpr().apply(this);
+        }
+        if(node.getRsqBr() != null)
+        {
+            node.getRsqBr().apply(this);
+        }
+		String name = ((AArrName) (node.getArrName())).getWord().getText();
+		assert (vars.isArray(name));
+		pushCommand("lda", vars.getAdress(name));
+		pushCommand("index");
+        outAIndexVariable(node);
+    }
+	
+//	
+//	@Override
+//	public void outAIndexVariable(AIndexVariable node)
+//    {
+//        inAIndexVariable(node);
+//        if(node.getArrName() != null)
+//        {
+//            node.getArrName().apply(this);
+//        }
+//        if(node.getLsqBr() != null)
+//        {
+//            node.getLsqBr().apply(this);
+//        }
+//        if(node.getExpr() != null)
+//        {
+//            node.getExpr().apply(this);
+//        }
+//        if(node.getRsqBr() != null)
+//        {
+//            node.getRsqBr().apply(this);
+//        }
+//		
+////		String name = ((AArrName) (node.getArrName())).getWord().getText();
+////		assert (vars.isArray(name));
+////		pushCommand("lda", vars.getAdress(name));
+////		pushCommand("index");
+////		pushCommand("lds" + getCharType(name));
+//		
+//        outAIndexVariable(node);
+//    }
 }

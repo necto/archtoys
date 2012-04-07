@@ -26,17 +26,19 @@ public class App
 //								 "print var - 1\n" +
 //								 "itar = i - k + nana"))));
 //				new StringReader ("var = 3 + frac - 8*(k mod 3 - 5/6)\n print var"))));
-				new StringReader ("var = -sin(-5 + -3, 7)"))));
+//				new StringReader ("var = -sin(-5 + -3)"))));
+				new StringReader ("ivar[r] = a[6-v]"))));
 		
 		
 		try {
 		Start tree = p.parse();
-		VarsExtractor vv = new VarsExtractor();
-		Compiler c = new Compiler(vv);
+		MemTable mem = new MemTable();
+		VarsExtractor vv = new VarsExtractor(mem);
+		Compiler c = new Compiler(mem);
 		
 		tree.apply(vv);
 		tree.apply(c);
-		System.out.println (vv.memoryTable);
+		System.out.println (mem.table);
 		System.out.println (c.asm);
 		
 //		Lexer lex = initLexer("1234");
