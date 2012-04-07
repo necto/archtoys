@@ -52,7 +52,7 @@ Productions
  
  unit = operand |
   {inverted} minus unit |
-  {call} fun_name l_br unit r_br;
+  {call} fun_name l_br expr_list r_br;
 
  operand = val |
   {nested} l_br expr r_br;

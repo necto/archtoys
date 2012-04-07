@@ -147,10 +147,10 @@ public class Compiler extends DepthFirstAdapter
     {
         inACallUnit(node);
 		pushCommand("ms");
-		
-        if(node.getUnit() != null)
+
+        if(node.getExprList() != null)
         {
-            node.getUnit().apply(this);
+            node.getExprList().apply(this);
         }
 		
         if(node.getFunName() != null)
