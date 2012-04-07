@@ -22,11 +22,11 @@ public class VarsExtractor extends DepthFirstAdapter
 		this.table = table;
 	}
 	
-	private MemTable.Type induceType (String name)
+	private Type induceType (String name)
 	{
 		if ("ijklmn".indexOf( name.charAt(0)) != -1)
-			return MemTable.Type.INTEGER;
-		return MemTable.Type.FLOAT;
+			return Type.INTEGER;
+		return Type.FLOAT;
 	}
 	
 	private void handleVar (String name, boolean arrayp)

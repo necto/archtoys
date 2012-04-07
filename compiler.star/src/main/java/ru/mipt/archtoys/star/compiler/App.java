@@ -29,15 +29,17 @@ public class App
 //								 "itar = i - k + nana"))));
 //				new StringReader ("var = 3 + frac - 8*(k mod 3 - 5/6)\n print var"))));
 //				new StringReader ("var = -sin(-5 + -3)"))));
-				new StringReader ("ivar[r] = a[6-4.4]"))));
+//				new StringReader ("ivar[r] = a[6-4.4]"))));
+				new StringReader ("ivan = sin(iabs)\n print ivan, abs(iabs)"))));
 		
 		
 		try {
 		Start tree = p.parse();
 		MemTable mem = new MemTable();
-		TypeDeriver td = new TypeDeriver(mem);
+		FunTable funcs = new FunTable();
+		TypeDeriver td = new TypeDeriver(mem, funcs);
 		VarsExtractor vv = new VarsExtractor(mem);
-		Compiler c = new Compiler(mem, td);
+		Compiler c = new Compiler(mem, td, funcs);
 		
 		tree.apply(vv);
 		tree.apply(td);

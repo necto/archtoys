@@ -15,21 +15,6 @@ public class MemTable
 {
 	public final int ARRAY_SIZE = 100;
 	
-	public enum Type
-	{
-		INTEGER (1, 'i'),
-		FLOAT (2, 'd');
-		private int size;
-		private char sign;
-		public int size() {return size;}
-		public char sign() {return sign;}
-		Type (int size, char sign)
-		{
-			this.size = size;
-			this.sign = sign;
-		}
-	};
-	
 	public class Variable
 	{
 		public String name;

@@ -17,11 +17,13 @@ public class Compiler extends DepthFirstAdapter
 	
 	private MemTable vars;
 	private TypeDeriver types;
+	private FunTable funcs;
 	
-	public Compiler (MemTable v, TypeDeriver types)
+	public Compiler (MemTable v, TypeDeriver types, FunTable funcs)
 	{
 		this.vars = v;
 		this.types = types;
+		this.funcs = funcs;
 	}
 	
 	private void pushCommand (String cmd)
@@ -36,10 +38,8 @@ public class Compiler extends DepthFirstAdapter
 	
 	private void adoptType (Node node)
 	{
-		MemTable.Type type = types.getType (node);
-		MemTable.Type expected = types.getExpectedType (node);
-		
-		System.out.println("adopting: (" + node + ")[" + type + expected + "]");
+		Type type = types.getType (node);
+		Type expected = types.getExpectedType (node);
 		
 		if (type == null || expected == null)
 			return;
@@ -75,7 +75,7 @@ public class Compiler extends DepthFirstAdapter
 	@Override
 	public void defaultIn(Node node)
     {
-        System.out.println (node.getClass().toString() + " " + node.toString());
+//        System.out.println (node.getClass().toString() + " " + node.toString());
     }
 	
 	@Override
@@ -193,7 +193,7 @@ public class Compiler extends DepthFirstAdapter
             node.getExprList().apply(this);
         }
 		
-		pushCommand("ldci", "\'print procedure adress\'");
+		pushCommand("ldci", funcs.get("print").code);
 		pushCommand("call");
         outAPrinter(node);
     }
@@ -212,7 +212,7 @@ public class Compiler extends DepthFirstAdapter
         if(node.getFunName() != null)
         {
 			String name = ((AFunName) node.getFunName()).getWord().getText();
-			pushCommand("ldci", "\'adress of " + name + "\'");
+			pushCommand("ldci", funcs.get(name).code);
         }
 		else throw new RuntimeException("Here expected some function name [" +
 										node.getLBr().getLine() + ", " +

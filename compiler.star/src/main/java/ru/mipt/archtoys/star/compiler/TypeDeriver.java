@@ -8,7 +8,7 @@ import gramm.analysis.DepthFirstAdapter;
 import gramm.node.*;
 import java.util.HashMap;
 import java.util.Map;
-import ru.mipt.archtoys.star.compiler.MemTable.Type;
+import ru.mipt.archtoys.star.compiler.Type;
 
 /**
  *
@@ -16,35 +16,37 @@ import ru.mipt.archtoys.star.compiler.MemTable.Type;
  */
 public class TypeDeriver extends DepthFirstAdapter
 {
-	private Map<Node, MemTable.Type> types = new HashMap<Node, MemTable.Type>();
-	private Map<Node, MemTable.Type> expected = new HashMap<Node, MemTable.Type>();
+	private Map<Node, Type> types = new HashMap<Node, Type>();
+	private Map<Node, Type> expected = new HashMap<Node, Type>();
 	private MemTable vars;
+	private FunTable funcs;
 
-	public TypeDeriver(MemTable vars)
+	public TypeDeriver(MemTable vars, FunTable funcs)
 	{
 		this.vars = vars;
+		this.funcs = funcs;
 	}
 	
-	public MemTable.Type getType (Node n)
+	public Type getType (Node n)
 	{
 		return types.get(n);
 	}
 	
-	public MemTable.Type getExpectedType (Node n)
+	public Type getExpectedType (Node n)
 	{
 		return expected.get(n);
 	}
 	
-	private MemTable.Type derive(Node ... children)
+	private Type derive(Node ... children)
 	{
-		MemTable.Type t = MemTable.Type.INTEGER;
+		Type t = Type.INTEGER;
 		for (Node n : children)
 			if (n != null)
 			{
-				MemTable.Type childType = types.get(n);
-				if (childType == MemTable.Type.FLOAT)
+				Type childType = types.get(n);
+				if (childType == Type.FLOAT)
 				{
-					t = MemTable.Type.FLOAT;// float dominates integer always
+					t = Type.FLOAT;// float dominates integer always
 					break;
 				}
 			}
@@ -53,7 +55,7 @@ public class TypeDeriver extends DepthFirstAdapter
 	
 	private void inheritType (Node node, Node ... children)
 	{
-		MemTable.Type t = derive(children);
+		Type t = derive(children);
 		types.put(node, t);
 		for (Node child : children)
 			expected.put(child, t);
@@ -154,9 +156,9 @@ public class TypeDeriver extends DepthFirstAdapter
 	@Override
     public void outAModFactor (AModFactor node)
     {
-		types.put (node, MemTable.Type.INTEGER);
-		expected.put (node.getFactor(), MemTable.Type.INTEGER);
-		expected.put (node.getUnit(), MemTable.Type.INTEGER);
+		types.put (node, Type.INTEGER);
+		expected.put (node.getFactor(), Type.INTEGER);
+		expected.put (node.getUnit(), Type.INTEGER);
     }
 
 	@Override
@@ -175,7 +177,13 @@ public class TypeDeriver extends DepthFirstAdapter
     public void outACallUnit (ACallUnit node)
     {
 		inheritType (node, node.getFunName());
-		//TODO: handle expr list here properly !!!
+		String fname = ((AFunName) (node.getFunName())).getWord().getText();
+		if (funcs.get(fname).val == null)
+			types.put(node, types.get(node.getExprList()));
+		else
+			types.put(node, funcs.get(fname).val);
+		if (funcs.get(fname).arg != null)
+			expected.put (node.getExprList(), funcs.get(fname).arg);
     }
 
 	@Override
@@ -199,13 +207,13 @@ public class TypeDeriver extends DepthFirstAdapter
 	@Override
     public void outAConstVal (AConstVal node) //leaf
     {
-        types.put (node, MemTable.Type.INTEGER);
+        types.put (node, Type.INTEGER);
     }
 
 	@Override
     public void outAFconstVal (AFconstVal node) //leaf
     {
-        types.put (node, MemTable.Type.FLOAT);
+        types.put (node, Type.FLOAT);
     }
 
 	@Override
@@ -218,7 +226,7 @@ public class TypeDeriver extends DepthFirstAdapter
     public void outAIndexVariable (AIndexVariable node)
     {
 		inheritType (node, node.getArrName());
-		expected.put (node.getExpr(), MemTable.Type.INTEGER);
+		expected.put (node.getExpr(), Type.INTEGER);
     }
 
 	@Override
@@ -230,8 +238,7 @@ public class TypeDeriver extends DepthFirstAdapter
 	@Override
     public void outAFunName (AFunName node) //leaf
     {
-        types.put (node, MemTable.Type.FLOAT); //  TODO: take a function table into account
-											  // get a function return type and taken type here!!!
+        types.put (node, funcs.get(node.getWord().getText()).val);
     }
 
 	@Override
