@@ -8,6 +8,7 @@ import gramm.analysis.DepthFirstAdapter;
 import gramm.node.*;
 import java.util.HashMap;
 import java.util.Map;
+import ru.mipt.archtoys.star.compiler.MemTable.Type;
 
 /**
  *
@@ -16,6 +17,7 @@ import java.util.Map;
 public class TypeDeriver extends DepthFirstAdapter
 {
 	private Map<Node, MemTable.Type> types = new HashMap<Node, MemTable.Type>();
+	private Map<Node, MemTable.Type> expected = new HashMap<Node, MemTable.Type>();
 	private MemTable vars;
 
 	public TypeDeriver(MemTable vars)
@@ -26,6 +28,11 @@ public class TypeDeriver extends DepthFirstAdapter
 	public MemTable.Type getType (Node n)
 	{
 		return types.get(n);
+	}
+	
+	public MemTable.Type getExpectedType (Node n)
+	{
+		return expected.get(n);
 	}
 	
 	private MemTable.Type derive(Node ... children)
@@ -43,6 +50,14 @@ public class TypeDeriver extends DepthFirstAdapter
 			}
 		return t;
 	}
+	
+	private void inheritType (Node node, Node ... children)
+	{
+		MemTable.Type t = derive(children);
+		types.put(node, t);
+		for (Node child : children)
+			expected.put(child, t);
+	}
 
 	@Override
     public void outStart(Start node)
@@ -52,37 +67,39 @@ public class TypeDeriver extends DepthFirstAdapter
 	@Override
     public void outAProgram(AProgram node)
     {
-		types.put(node, derive(node.getStatement()));
+		inheritType(node, node.getStatement());
     }
 
 	@Override
     public void outAPrognProgram(APrognProgram node)
     {
 		types.put(node, derive(node.getProgram())); //Type of the whole programm
-    }												// is the type of the last statement
+    }	// is the type of the last statement, it doesnt limit other types of expressions.
 
 	@Override
     public void outAAssignmentStatement(AAssignmentStatement node)
     {
-		types.put(node, derive(node.getAssignment()));
+		inheritType(node, node.getAssignment());
     }
 
 	@Override
     public void outAPrinterStatement(APrinterStatement node)
     {
-		types.put(node, derive(node.getPrinter()));
+		inheritType(node, node.getPrinter());
     }
 
 	@Override
     public void outAAssignment(AAssignment node)
     {
-		types.put(node, derive(node.getVariable()));
+		inheritType(node, node.getVariable());
+		expected.put(node.getExpr(), types.get(node));
     }
 
 	@Override
     public void outAPrinter(APrinter node)
     {
 		types.put(node, derive(node.getExprList()));
+		//Printer mustn't limit it's arguments in types.
     }
 
 	@Override
@@ -95,126 +112,131 @@ public class TypeDeriver extends DepthFirstAdapter
     public void outASeveralExprList(ASeveralExprList node)
     {
 		types.put(node, derive(node.getExprList())); //type of the last expr
+		// expectations of types will come from up (eg. from function call)
     }
 
 	@Override
     public void outAExpr(AExpr node)
     {
-		types.put(node, derive(node.getFactor()));
+		inheritType(node, node.getFactor());
     }
 
 	@Override
     public void outASumExpr(ASumExpr node)
     {
-		types.put(node, derive(node.getExpr(), node.getFactor()));
+		inheritType(node, node.getFactor(), node.getExpr());
     }
 
 	@Override
     public void outASubExpr(ASubExpr node)
     {
-		types.put(node, derive(node.getExpr(), node.getFactor()));
+		inheritType(node, node.getFactor(), node.getExpr());
     }
 
 	@Override
     public void outAFactor(AFactor node)
     {
-		types.put(node, derive(node.getUnit()));
+		inheritType(node, node.getUnit());
     }
 
 	@Override
     public void outAMulFactor(AMulFactor node)
     {
-		types.put(node, derive(node.getFactor(), node.getUnit()));
+		inheritType(node, node.getFactor(), node.getUnit());
     }
 
 	@Override
     public void outADivFactor(ADivFactor node)
     {
-		types.put(node, derive(node.getFactor(), node.getUnit()));
+		inheritType(node, node.getFactor(), node.getUnit());
     }
 
 	@Override
-    public void outAModFactor(AModFactor node)
+    public void outAModFactor (AModFactor node)
     {
-		types.put(node, MemTable.Type.INTEGER);
+		types.put (node, MemTable.Type.INTEGER);
+		expected.put (node.getFactor(), MemTable.Type.INTEGER);
+		expected.put (node.getUnit(), MemTable.Type.INTEGER);
     }
 
 	@Override
-    public void outAUnit(AUnit node)
+    public void outAUnit (AUnit node)
     {
-		types.put(node, derive(node.getOperand()));
+		inheritType (node, node.getOperand());
     }
 
 	@Override
-    public void outAInvertedUnit(AInvertedUnit node)
+    public void outAInvertedUnit (AInvertedUnit node)
     {
-		types.put(node, derive(node.getUnit()));
+		inheritType (node, node.getUnit());
     }
 
 	@Override
-    public void outACallUnit(ACallUnit node)
+    public void outACallUnit (ACallUnit node)
     {
-		types.put(node, derive(node.getFunName()));
+		inheritType (node, node.getFunName());
+		//TODO: handle expr list here properly !!!
     }
 
 	@Override
-    public void outAOperand(AOperand node)
+    public void outAOperand (AOperand node)
     {
-		types.put(node, derive(node.getVal()));
+		inheritType (node, node.getVal());
     }
 
 	@Override
-    public void outANestedOperand(ANestedOperand node)
+    public void outANestedOperand (ANestedOperand node)
     {
-		types.put(node, derive(node.getExpr()));
+		inheritType (node, node.getExpr());
     }
 
 	@Override
-    public void outAVal(AVal node)
+    public void outAVal (AVal node)
     {
-        types.put(node, derive(node.getVariable()));
+		inheritType (node, node.getVariable());
     }
 
 	@Override
-    public void outAConstVal(AConstVal node)
+    public void outAConstVal (AConstVal node) //leaf
     {
-        types.put(node, MemTable.Type.INTEGER);
+        types.put (node, MemTable.Type.INTEGER);
     }
 
 	@Override
-    public void outAFconstVal(AFconstVal node)
+    public void outAFconstVal (AFconstVal node) //leaf
     {
-        types.put(node, MemTable.Type.FLOAT);
+        types.put (node, MemTable.Type.FLOAT);
     }
 
 	@Override
-    public void outAVariable(AVariable node)
+    public void outAVariable (AVariable node)
     {
-		types.put(node, derive(node.getVarName()));
+		inheritType (node, node.getVarName());
     }
 
 	@Override
-    public void outAIndexVariable(AIndexVariable node)
+    public void outAIndexVariable (AIndexVariable node)
     {
-		types.put(node, derive(node.getArrName()));
+		inheritType (node, node.getArrName());
+		expected.put (node.getExpr(), MemTable.Type.INTEGER);
     }
 
 	@Override
-    public void outAVarName(AVarName node)
+    public void outAVarName (AVarName node) //leaf
     {
-        types.put(node, vars.getType(node.getWord().getText()));
+        types.put (node, vars.getType(node.getWord().getText()));
     }
 
 	@Override
-    public void outAFunName(AFunName node)
+    public void outAFunName (AFunName node) //leaf
     {
-        types.put(node, MemTable.Type.FLOAT); //TODO: take a function table into account
-											  // get a function return type here!!!
+        types.put (node, MemTable.Type.FLOAT); //  TODO: take a function table into account
+											  // get a function return type and taken type here!!!
     }
 
 	@Override
-    public void outAArrName(AArrName node)
+    public void outAArrName (AArrName node) //leaf
     {
-        types.put(node, vars.getType(node.getWord().getText()));
+        types.put (node, vars.getType(node.getWord().getText()));
     }
 }

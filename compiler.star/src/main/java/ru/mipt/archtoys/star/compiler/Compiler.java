@@ -31,12 +31,45 @@ public class Compiler extends DepthFirstAdapter
 	
 	private void pushCommand (String cmd, Object argument)
 	{
-		pushCommand(cmd + " " + argument);
+		pushCommand (cmd + " " + argument);
 	}
 	
-	private void pushCommand (String cmd, Object arg1, Object arg2)
+	private void adoptType (Node node)
 	{
-		pushCommand(cmd + " " + arg1 + " " + arg2);
+		MemTable.Type type = types.getType (node);
+		MemTable.Type expected = types.getExpectedType (node);
+		
+		System.out.println("adopting: (" + node + ")[" + type + expected + "]");
+		
+		if (type == null || expected == null)
+			return;
+		
+		switch (type)
+		{
+			case INTEGER:
+				switch (expected)
+				{
+					case INTEGER: break;
+					case FLOAT:
+						pushCommand("fi2d");
+						break;
+				}
+				break;
+			case FLOAT:
+				switch (expected)
+				{
+					case INTEGER:
+						pushCommand("fd2i");
+						break;
+					case FLOAT: break;
+				}
+				break;
+		}
+	}
+	
+	private char getCharType (Node n)
+	{
+		return types.getType(n).sign();
 	}
 	
 	@Override
@@ -46,76 +79,88 @@ public class Compiler extends DepthFirstAdapter
     }
 	
 	@Override
+	public void defaultOut (Node node)
+    {
+        adoptType(node);
+    }
+	
+	@Override
     public void inStart(Start node)
     {
         defaultIn(node);
-		pushCommand("alloc", vars.getMemSize());
+		pushCommand ("alloc", vars.getMemSize());
+        defaultOut(node);
     }
 
 	@Override
     public void outAConstVal(AConstVal node)
     {
-		pushCommand("ldci", node.getNumber().getText());
+		pushCommand ("ldci", node.getNumber().getText());
+        defaultOut(node);
     }
 	
 	@Override
     public void outAFconstVal(AFconstVal node)
     {
-		pushCommand("ldcd", node.getFnumber().getText());
+		pushCommand ("ldcd", node.getFnumber().getText());
+        defaultOut(node);
     }
 	
 	@Override
     public void outASubExpr (ASubExpr node)
     {
-		pushCommand("sub");
+		pushCommand ("sub");
+        defaultOut(node);
     }
 	
 	@Override
     public void outASumExpr (ASumExpr node)
     {
-		pushCommand("add");
+		pushCommand ("add");
+        defaultOut(node);
     }
 	
 	@Override
     public void outAMulFactor (AMulFactor node)
     {
-		pushCommand("mul");
+		pushCommand ("mul");
+        defaultOut(node);
     }
 	
 	@Override
     public void outADivFactor (ADivFactor node)
     {
-		pushCommand("div");
+		pushCommand ("div");
+        defaultOut(node);
     }
 	
 	@Override
     public void outAModFactor (AModFactor node)
     {
-		pushCommand("rem");
+		pushCommand ("rem");
+        defaultOut(node);
     }
 	
 	@Override
     public void outAInvertedUnit(AInvertedUnit node)
     {
-        pushCommand("chs");
+        pushCommand ("chs");
+        defaultOut(node);
     }
-	
-	private char getCharType (Node n)
-	{
-		return types.getType(n).sign();
-	}
 	
 	@Override
 	public void outAVarName (AVarName node)
 	{
 		String name = node.getWord().getText();
-		pushCommand("lda", vars.getAdress(name));
+		pushCommand ("lda", vars.getAdress(name));
+        defaultOut(node);
 	}
 	
 	@Override
 	public void outAVal (AVal node)
 	{
-		pushCommand("lds" + getCharType(node));
+		pushCommand ("lds" + getCharType(node));
+        defaultOut(node);
 	}
 
     @Override
@@ -123,12 +168,12 @@ public class Compiler extends DepthFirstAdapter
     {
         inAAssignment(node);
 		
-        if(node.getExpr() != null)
+        if (node.getExpr() != null)
         {
             node.getExpr().apply(this);
         }
 		
-        if(node.getVariable() != null)
+        if (node.getVariable() != null)
         {
             node.getVariable().apply(this);
         }
@@ -202,35 +247,4 @@ public class Compiler extends DepthFirstAdapter
 		pushCommand("index");
         outAIndexVariable(node);
     }
-	
-//	
-//	@Override
-//	public void outAIndexVariable(AIndexVariable node)
-//    {
-//        inAIndexVariable(node);
-//        if(node.getArrName() != null)
-//        {
-//            node.getArrName().apply(this);
-//        }
-//        if(node.getLsqBr() != null)
-//        {
-//            node.getLsqBr().apply(this);
-//        }
-//        if(node.getExpr() != null)
-//        {
-//            node.getExpr().apply(this);
-//        }
-//        if(node.getRsqBr() != null)
-//        {
-//            node.getRsqBr().apply(this);
-//        }
-//		
-////		String name = ((AArrName) (node.getArrName())).getWord().getText();
-////		assert (vars.isArray(name));
-////		pushCommand("lda", vars.getAdress(name));
-////		pushCommand("index");
-////		pushCommand("lds" + getCharType(name));
-//		
-//        outAIndexVariable(node);
-//    }
 }

@@ -29,7 +29,7 @@ public class App
 //								 "itar = i - k + nana"))));
 //				new StringReader ("var = 3 + frac - 8*(k mod 3 - 5/6)\n print var"))));
 //				new StringReader ("var = -sin(-5 + -3)"))));
-				new StringReader ("ivar[r] = a[6-v]"))));
+				new StringReader ("ivar[r] = a[6-4.4]"))));
 		
 		
 		try {
