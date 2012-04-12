@@ -15,6 +15,14 @@ public class MemTable
 {
 	public final int ARRAY_SIZE = 100;
 	
+	public class IncompatibleUsage extends Exception
+	{
+
+		public IncompatibleUsage(String message) {
+			super(message);
+		}
+	}
+	
 	public class Variable
 	{
 		public String name;
@@ -57,10 +65,15 @@ public class MemTable
 	}
 	
 	public void registerVar (String name, Type type, int arrayd)
+			throws IncompatibleUsage
 	{
-		table.put (name,
-				   new Variable (name, chooseNextAdress(type, arrayd),
-								 type, arrayd));
+		Variable prev = table.get(name);
+		Variable cand = new Variable (name, chooseNextAdress(type, arrayd),
+								 type, arrayd);
+		if (prev != null && (!prev.type.equals(type) || (prev.arrayd != arrayd)))
+			throw new IncompatibleUsage("Variable " + name + " was differently " + 
+										"defined: " + prev + " then" + cand);
+		table.put (name,  cand);
 	}
 	
 	public Type getType (String name)

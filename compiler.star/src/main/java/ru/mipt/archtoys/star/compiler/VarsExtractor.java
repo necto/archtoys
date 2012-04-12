@@ -6,6 +6,9 @@ package ru.mipt.archtoys.star.compiler;
 
 import gramm.analysis.DepthFirstAdapter;
 import gramm.node.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ru.mipt.archtoys.star.compiler.MemTable.IncompatibleUsage;
 
 /**
  *
@@ -35,23 +38,35 @@ public class VarsExtractor extends DepthFirstAdapter
 		return 1;
 	}
 	
-	private void handleVar (String name, int arrayd)
+	private void handleVar (String name, int arrayd) throws IncompatibleUsage
 	{
-		if (!table.hasVar(name))
 			table.registerVar(name, induceType(name), arrayd);
 	}
 	
 	@Override
 	public void outAVarName (AVarName node)
 	{
-		handleVar (node.getWord().getText(), 0);
+		try {
+			handleVar (node.getWord().getText(), 0);
+		}
+		catch (IncompatibleUsage ex) {
+			throw new RuntimeException ("[ " + node.getWord().getLine() +
+										", " + node.getWord().getPos() + 
+										"] " + node.toString() + ex.getMessage());
+		}
 	}
 	
 	@Override
 	public void outAIndexVariable(AIndexVariable node)
     {
-		//TODO: support multidimensional arrays
-		handleVar (((AArrName) (node.getArrName())).getWord().getText(),
-					countExprs(node.getExprList()));
+		try {
+			handleVar (((AArrName) (node.getArrName())).getWord().getText(),
+						countExprs(node.getExprList()));
+		}
+		catch (IncompatibleUsage ex) {
+			throw new RuntimeException ("[ " + node.getLsqBr().getLine() +
+										", " + node.getLsqBr().getPos() + 
+										"] " + node.toString() + ex.getMessage());
+		}
     }
 }

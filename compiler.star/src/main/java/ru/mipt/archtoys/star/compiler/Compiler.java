@@ -235,11 +235,11 @@ public class Compiler extends DepthFirstAdapter
     public void caseAIndexVariable(AIndexVariable node)
     {
         inAIndexVariable(node);
-        if(node.getArrName() != null)
+        if (node.getArrName() != null)
         {
             node.getArrName().apply(this);
         }
-        if(node.getExprList() != null)
+        if (node.getExprList() != null)
         {
             node.getExprList().apply(this);
         }
@@ -254,8 +254,8 @@ public class Compiler extends DepthFirstAdapter
 			pushCommand ("addi");
 		}
 		
-		pushCommand("lda", vars.getAdress(name));
-		pushCommand("index");
-        outAIndexVariable(node);
+		pushCommand ("lda", vars.getAdress (name));
+		pushCommand ("index");
+        outAIndexVariable (node);
     }
 }
