@@ -6,7 +6,9 @@ package ru.mipt.archtoys.star.compiler;
 
 import gramm.analysis.DepthFirstAdapter;
 import gramm.node.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import ru.mipt.archtoys.star.compiler.Type;
 
@@ -221,12 +223,28 @@ public class TypeDeriver extends DepthFirstAdapter
     {
 		inheritType (node, node.getVarName());
     }
+	
+	private List<PExpr> getExprList (PExprList list)
+	{
+		if (list instanceof ASeveralExprList)
+		{
+			ASeveralExprList several = (ASeveralExprList)list;
+			List<PExpr> ret =  getExprList(several.getExprList());
+			ret.add(several.getExpr());
+			return ret;
+		}
+		List<PExpr> ret = new ArrayList<PExpr>();
+		assert (list instanceof AExprList);
+		ret.add (((AExprList)list).getExpr());
+		return ret;
+	}
 
 	@Override
     public void outAIndexVariable (AIndexVariable node)
     {
 		inheritType (node, node.getArrName());
-		expected.put (node.getExpr(), Type.INTEGER);
+		for(PExpr e : getExprList(node.getExprList()))
+			expected.put (e, Type.INTEGER);
     }
 
 	@Override

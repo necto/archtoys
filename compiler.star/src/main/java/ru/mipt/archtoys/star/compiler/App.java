@@ -30,7 +30,8 @@ public class App
 //				new StringReader ("var = 3 + frac - 8*(k mod 3 - 5/6)\n print var"))));
 //				new StringReader ("var = -sin(-5 + -3)"))));
 //				new StringReader ("ivar[r] = a[6-4.4]"))));
-				new StringReader ("ivan = sin(iabs)\n print ivan, abs(iabs)"))));
+//				new StringReader ("ivan = -sin(iabs)\n print ivan, abs(iabs)"))));
+				new StringReader ("a[5,3,8/2] = n[15-3]"))));
 		
 		
 		try {

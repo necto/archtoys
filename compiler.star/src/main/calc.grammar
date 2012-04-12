@@ -64,7 +64,7 @@ Productions
   {fconst} fnumber;
 
  variable = var_name |
-  {index} arr_name lsq_br expr rsq_br;
+  {index} arr_name lsq_br expr_list rsq_br;
 
  var_name = word;
 

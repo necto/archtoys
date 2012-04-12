@@ -6,6 +6,8 @@ package ru.mipt.archtoys.star.compiler;
 
 import gramm.analysis.DepthFirstAdapter;
 import gramm.node.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -221,6 +223,14 @@ public class Compiler extends DepthFirstAdapter
         outACallUnit(node);
     }
 	
+	private int countExprs (PExprList list)
+	{
+		if (list instanceof ASeveralExprList)
+			return countExprs(((ASeveralExprList)list).getExprList()) + 1;
+		assert (list instanceof AExprList);
+		return 1;
+	}
+	
     @Override
     public void caseAIndexVariable(AIndexVariable node)
     {
@@ -229,20 +239,21 @@ public class Compiler extends DepthFirstAdapter
         {
             node.getArrName().apply(this);
         }
-        if(node.getLsqBr() != null)
+        if(node.getExprList() != null)
         {
-            node.getLsqBr().apply(this);
-        }
-        if(node.getExpr() != null)
-        {
-            node.getExpr().apply(this);
-        }
-        if(node.getRsqBr() != null)
-        {
-            node.getRsqBr().apply(this);
+            node.getExprList().apply(this);
         }
 		String name = ((AArrName) (node.getArrName())).getWord().getText();
 		assert (vars.isArray(name));
+		
+		int nIndexes = countExprs (node.getExprList());
+		while (0<--nIndexes)
+		{
+			pushCommand ("ldci", 100);
+			pushCommand ("mul(?i)");
+			pushCommand ("add(?i)");
+		}
+		
 		pushCommand("lda", vars.getAdress(name));
 		pushCommand("index");
         outAIndexVariable(node);
