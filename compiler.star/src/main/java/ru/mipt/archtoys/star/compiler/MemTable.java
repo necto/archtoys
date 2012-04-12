@@ -20,31 +20,34 @@ public class MemTable
 		public String name;
 		public int adress;
 		public Type type;
-		public boolean arrayp; //TODO: support multidimensional arrays
+		public int arrayd; //TODO: support multidimensional arrays
 		
-		Variable (String name, int adress, Type type, boolean arrayp)
+		Variable (String name, int adress, Type type, int arrayd)
 		{
 			this.name = name;
 			this.adress = adress;
 			this.type = type;
-			this.arrayp = arrayp;
+			this.arrayd = arrayd;
 		}
 		
 		@Override
 		public String toString()
 		{
 			return "[" + name + "(" + adress + "," +
-					type.sign() + (arrayp? " array" : " scalar") + ")]";
+					type.sign() + ((arrayd > 0) ? " array"+arrayd : " scalar") + ")]";
 		}
 	}
 	
 	private int lastAdress = 0;
 	public Map<String, Variable> table = new HashMap<String, Variable>();
 	
-	private Integer chooseNextAdress (Type type, boolean arrayp)
+	private Integer chooseNextAdress (Type type, int arrayd)
 	{
 		int adress = lastAdress;
-		lastAdress += type.size() * (arrayp? ARRAY_SIZE : 1);
+		int size = type.size();
+		while (arrayd -->0)
+			size *= ARRAY_SIZE;
+		lastAdress += size;
 		return adress;
 	}
 	
@@ -53,11 +56,11 @@ public class MemTable
 		return table.containsKey(name);
 	}
 	
-	public void registerVar (String name, Type type, boolean arrayp)
+	public void registerVar (String name, Type type, int arrayd)
 	{
 		table.put (name,
-				   new Variable (name, chooseNextAdress(type, arrayp),
-								 type, arrayp));
+				   new Variable (name, chooseNextAdress(type, arrayd),
+								 type, arrayd));
 	}
 	
 	public Type getType (String name)
@@ -70,9 +73,9 @@ public class MemTable
 		return table.get(name).adress;
 	}
 	
-	public boolean isArray (String name)
+	public int getArrayd (String name)
 	{
-		return table.get(name).arrayp;
+		return table.get(name).arrayd;
 	}
 	
 	public int getMemSize()

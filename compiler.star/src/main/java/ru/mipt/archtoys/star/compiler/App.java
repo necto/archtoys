@@ -31,8 +31,7 @@ public class App
 //				new StringReader ("var = -sin(-5 + -3)"))));
 //				new StringReader ("ivar[r] = a[6-4.4]"))));
 //				new StringReader ("ivan = -sin(iabs)\n print ivan, abs(iabs)"))));
-				new StringReader ("a[5,3,8/2] = n[15-3]"))));
-		
+				new StringReader ("a[5,3,8.3/2] = n[15-3]"))));
 		
 		try {
 		Start tree = p.parse();

@@ -111,28 +111,28 @@ public class Compiler extends DepthFirstAdapter
 	@Override
     public void outASubExpr (ASubExpr node)
     {
-		pushCommand ("sub");
+		pushCommand ("sub" + types.getType (node).sign());
         defaultOut(node);
     }
 	
 	@Override
     public void outASumExpr (ASumExpr node)
     {
-		pushCommand ("add");
+		pushCommand ("add" + types.getType (node).sign());
         defaultOut(node);
     }
 	
 	@Override
     public void outAMulFactor (AMulFactor node)
     {
-		pushCommand ("mul");
+		pushCommand ("mul" + types.getType (node).sign());
         defaultOut(node);
     }
 	
 	@Override
     public void outADivFactor (ADivFactor node)
     {
-		pushCommand ("div");
+		pushCommand ("div" + types.getType (node).sign());
         defaultOut(node);
     }
 	
@@ -146,7 +146,7 @@ public class Compiler extends DepthFirstAdapter
 	@Override
     public void outAInvertedUnit(AInvertedUnit node)
     {
-        pushCommand ("chs");
+        pushCommand ("chs" + types.getType (node).sign());
         defaultOut(node);
     }
 	
@@ -244,14 +244,14 @@ public class Compiler extends DepthFirstAdapter
             node.getExprList().apply(this);
         }
 		String name = ((AArrName) (node.getArrName())).getWord().getText();
-		assert (vars.isArray(name));
+		assert (vars.getArrayd(name) > 0);
 		
 		int nIndexes = countExprs (node.getExprList());
 		while (0<--nIndexes)
 		{
 			pushCommand ("ldci", 100);
-			pushCommand ("mul(?i)");
-			pushCommand ("add(?i)");
+			pushCommand ("muli");
+			pushCommand ("addi");
 		}
 		
 		pushCommand("lda", vars.getAdress(name));
