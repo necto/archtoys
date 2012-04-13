@@ -6,8 +6,6 @@ package ru.mipt.archtoys.star.compiler;
 
 import gramm.analysis.DepthFirstAdapter;
 import gramm.node.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import ru.mipt.archtoys.star.compiler.MemTable.IncompatibleUsage;
 
 /**

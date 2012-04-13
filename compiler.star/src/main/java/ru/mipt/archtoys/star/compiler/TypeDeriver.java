@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import ru.mipt.archtoys.star.compiler.Type;
 
 /**
  *
@@ -264,4 +263,10 @@ public class TypeDeriver extends DepthFirstAdapter
     {
         types.put (node, vars.getType(node.getWord().getText()));
     }
+
+	public void reset()
+	{
+		types.clear();
+		expected.clear();
+	}
 }

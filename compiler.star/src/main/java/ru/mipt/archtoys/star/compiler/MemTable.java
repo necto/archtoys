@@ -49,6 +49,13 @@ public class MemTable
 	private int lastAdress = 0;
 	public Map<String, Variable> table = new HashMap<String, Variable>();
 	
+	
+	public void reset()
+	{
+		table.clear();
+		lastAdress = 0;
+	}
+	
 	private Integer chooseNextAdress (Type type, int arrayd)
 	{
 		int adress = lastAdress;
