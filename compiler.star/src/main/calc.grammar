@@ -33,6 +33,7 @@ Productions
   {progn} program nln statement;
 
  statement = 
+  {empty} |
   {assignment} assignment |
   {printer} printer;
 
