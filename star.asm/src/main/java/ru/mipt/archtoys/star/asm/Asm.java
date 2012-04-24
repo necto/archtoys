@@ -1,4 +1,7 @@
 package ru.mipt.archtoys.star.asm;
+
+import java.io.EOFException;
+
 /**
  * Hello world!
  *
@@ -11,6 +14,15 @@ public class Asm
     {
         System.out.println( "Hello World!" );
         reader = new Reader("input.star");
-        System.out.print(reader.readNext().defs);
+        Instruction instr;
+       
+        try {
+            while(true)
+            {
+                instr = reader.readNext();
+                instr.print();
+            }
+        } catch (EOFException ex) {
+        }
     }
 }

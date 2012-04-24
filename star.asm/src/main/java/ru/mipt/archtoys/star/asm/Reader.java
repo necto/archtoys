@@ -3,11 +3,10 @@
  * and open the template in the editor.
  */
 package ru.mipt.archtoys.star.asm;
+import java.io.EOFException;
 import java.io.FileReader;
-import java.io.IOError;
 import java.io.IOException;
 import java.io.StreamTokenizer;
-import ru.mipt.archtoys.star.asm.Instruction;
 
 /**
  *
@@ -27,37 +26,50 @@ public class Reader {
         }        
     }
     
-    private String readMnemo() throws IOException{
+    private String readMnemo() throws IOException, EOFException{
         int token = tokenizer.nextToken();
-        assert (token == StreamTokenizer.TT_WORD) : "Mnemonic must be word";
+        if (token == StreamTokenizer.TT_EOF){
+            throw new EOFException();
+        }
+        if (token != StreamTokenizer.TT_WORD){
+            throw new IOException("Expected word: " + (char)token);
+        }
         return tokenizer.sval;
     }
     
     private int readInt() throws IOException{
         int token = tokenizer.nextToken();
-        assert (token == StreamTokenizer.TT_NUMBER) : "Expected number";
+        if (token != StreamTokenizer.TT_NUMBER){
+            throw new IOException("Expected number: " + (char)token);
+        }
         return (int)tokenizer.nval;
     }
 
     private float readFloat() throws IOException{
         int token = tokenizer.nextToken();
-        assert (token == StreamTokenizer.TT_NUMBER) : "Expected number";
+        if (token != StreamTokenizer.TT_NUMBER){
+            throw new IOException("Expected number: " + (char)token);
+        }
         return (float)tokenizer.nval;
     }
     
     private int readAddr() throws IOException {
         int token = tokenizer.nextToken();
-        assert (token == StreamTokenizer.TT_NUMBER) : "Expected number";
+        if (token != StreamTokenizer.TT_NUMBER){
+            throw new IOException("Expected number: " + (char)token);
+        }
         return (int)tokenizer.nval;
     }
     
-    private void readEnd() throws IOException {
+    private void readEnd() throws IOException{
         int token = tokenizer.nextToken();
-        assert (token == ';') : "Expected semicolon";
+        if (token != ';'){
+            throw new IOException((char)token + "Expected semicolon");
+        }
     }
 
     
-    public Instruction readNext() {
+    public Instruction readNext() throws EOFException{
         Instruction instr = null;
                 
         try {
@@ -67,21 +79,23 @@ public class Reader {
             switch (instr.defs.getOperType()) {
             case INT:
                 int operInt = readInt();
-                instr.oper.setInt(operInt);
+                ((Instruction.OperInteger)instr.oper).value = operInt;
                 break;
             case FLOAT:
                 float operFloat = readFloat();
-                instr.oper.setFloat(operFloat);
+                ((Instruction.OperFloat)instr.oper).value = operFloat;
                 break;
             case ADDR:
                 int operAddr = readAddr();
-                instr.oper.setAddr(operAddr);
+                ((Instruction.OperAddr)instr.oper).value = operAddr;
                 break;
             default:
                 break;
             }
             
             readEnd();
+        } catch (EOFException ex){
+            throw ex; 
         } catch (IOException ex) {
             System.err.println("Caught IOException while tokenizing: "
                     + ex.getMessage());
