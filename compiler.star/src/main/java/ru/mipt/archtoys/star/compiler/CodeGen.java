@@ -28,7 +28,7 @@ public class CodeGen extends DepthFirstAdapter
 	
 	private void pushCommand (String cmd)
 	{
-		asm += cmd + "\n";
+		asm += cmd + ";\n";
 	}
 	
 	private void pushCommand (String cmd, Object argument)
