@@ -35,11 +35,7 @@ public class Reader {
         }
     }
     
-    private String readMnemo() throws IOException, EOFException{
-        int token = tokenizer.nextToken();
-        if (token == StreamTokenizer.TT_EOF){
-            throw new EOFException();
-        }
+    private String readMnemo() throws IOException{
         if (token != StreamTokenizer.TT_WORD){
             throw new IOException("Expected word: " + (char)token);
         }
@@ -47,7 +43,6 @@ public class Reader {
     }
     
     private int readInt() throws IOException{
-        int token = tokenizer.nextToken();
         if (token != StreamTokenizer.TT_NUMBER){
             throw new IOException("Expected number: " + (char)token);
         }
@@ -55,7 +50,6 @@ public class Reader {
     }
 
     private float readFloat() throws IOException{
-        int token = tokenizer.nextToken();
         if (token != StreamTokenizer.TT_NUMBER){
             throw new IOException("Expected number: " + (char)token);
         }
@@ -63,7 +57,6 @@ public class Reader {
     }
     
     private int readAddr() throws IOException {
-        int token = tokenizer.nextToken();
         if (token != StreamTokenizer.TT_NUMBER){
             throw new IOException("Expected number: " + (char)token);
         }
@@ -71,7 +64,6 @@ public class Reader {
     }
     
     private void readEnd() throws IOException{
-        int token = tokenizer.nextToken();
         if (token != ';'){
             throw new IOException((char)token + "Expected semicolon");
         }
@@ -93,19 +85,20 @@ public class Reader {
                 switch (instr.defs.getOperType()) {
                 case INT:
                     int operInt = readInt();
-                    instr.oper.setInt(operInt);
+                    ((Instruction.OperInteger) instr.oper).value = operInt;
                     break;
                 case FLOAT:
                     float operFloat = readFloat();
-                    instr.oper.setFloat(operFloat);
+                    ((Instruction.OperFloat) instr.oper).value = operFloat;
                     break;
                 case ADDR:
                     int operAddr = readAddr();
-                    instr.oper.setAddr(operAddr);
+                    ((Instruction.OperAddr) instr.oper).value = operAddr;
                     break;
                 default:
                     break;
                 }
+                break;
             case 2:
                 readEnd();
                 break;

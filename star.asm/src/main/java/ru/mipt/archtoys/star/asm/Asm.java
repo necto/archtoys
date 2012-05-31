@@ -15,9 +15,9 @@ public class Asm
     {
         reader = new Reader("input.star");
         LinkedList<Instruction> list = reader.readAll();
-        Iterator<Instruction> iter = list.descendingIterator();
+        Iterator<Instruction> iter = list.iterator();
         while ( iter.hasNext()){
-            System.out.println( iter.next().defs);
+            iter.next().print();
         }
     }
 }
