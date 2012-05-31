@@ -1,4 +1,8 @@
 package ru.mipt.archtoys.star.asm;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+
 /**
  * Hello world!
  *
@@ -9,8 +13,11 @@ public class Asm
     
     public static void main( String[] args )
     {
-        System.out.println( "Hello World!" );
         reader = new Reader("input.star");
-        System.out.print(reader.readNext().defs);
+        LinkedList<Instruction> list = reader.readAll();
+        Iterator<Instruction> iter = list.descendingIterator();
+        while ( iter.hasNext()){
+            System.out.println( iter.next().defs);
+        }
     }
 }
