@@ -20,45 +20,44 @@ public class Instruction {
         }
     }
     
-    public class Oper{
-        private int valInt;
-        private float valFloat;
-        private int valAddr;
+    public abstract class Oper{
+        @Override
+        public abstract String toString();
+    }
+    
+    public class OperInteger extends Oper{
+        public int value;
         
-        private OperType type;
-        
-        public Oper(OperType tp){
-            type = tp;
-        }
-        
-        public void setInt(int val){
-            assert (type == OperType.INT);
-            valInt = val;
+        private OperInteger(){
+            assert( defs.operType == OperType.INT);
         }
         
-        public void setFloat(float val) {
-            assert (type == OperType.FLOAT);
-            valFloat = val;
+        public String toString(){
+            return Integer.toString(value);
         }
-
-        public void setAddr(int val) {
-            assert (type == OperType.ADDR);
-            valAddr = val;
+    }
+    
+    public class OperFloat extends Oper{
+        public float value;
+        
+        private OperFloat(){
+            assert( defs.operType == OperType.FLOAT);
         }
         
-        public int getInt(){
-            assert (type == OperType.INT);
-            return valInt;
+        public String toString(){
+            return Float.toString(value);
         }
-
-        public float getFloat() {
-            assert (type == OperType.FLOAT);
-            return valFloat;
+    }
+    
+    public class OperAddr extends Oper{
+        public int value;
+        
+        private OperAddr(){
+            assert( defs.operType == OperType.ADDR);
         }
-
-        public int getAddr() {
-            assert (type == OperType.ADDR);
-            return valAddr;
+        
+        public String toString(){
+            return Integer.toString(value);
         }
     }
       
@@ -114,11 +113,33 @@ public class Instruction {
     public Instruction( String name) {
         try{
             defs = Defs.valueOf(name.toUpperCase());
-            oper = new Oper(defs.getOperType());
+            switch (defs.getOperType()){
+            case NONE:
+                break;
+            case INT:
+                oper = new OperInteger();
+                break;
+            case FLOAT:
+                oper = new OperFloat();
+                break;
+            case ADDR:
+                oper = new OperAddr();
+                break;
+            default:
+                break;
+            }           
         } catch (IllegalArgumentException ex) {
             System.err.println("Caught runtime exception while creating instruction: "
                     + ex);
             System.exit(1);
         }
+    }
+    
+    public void print(){
+        System.out.print(defs);
+        if (defs.hasOper()){
+            System.out.print(" " + oper);
+        }
+        System.out.println();
     }
 }

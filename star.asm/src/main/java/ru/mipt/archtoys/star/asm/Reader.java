@@ -5,7 +5,6 @@
 package ru.mipt.archtoys.star.asm;
 
 import java.io.FileReader;
-import java.io.IOError;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.util.LinkedList;
@@ -35,29 +34,47 @@ public class Reader {
             System.err.println("Caught IOException while init: " + ex.getMessage());
         }
     }
-
-    private String readMnemo() {
-        assert (token == StreamTokenizer.TT_WORD) : "Mnemonic must be word";
+    
+    private String readMnemo() throws IOException, EOFException{
+        int token = tokenizer.nextToken();
+        if (token == StreamTokenizer.TT_EOF){
+            throw new EOFException();
+        }
+        if (token != StreamTokenizer.TT_WORD){
+            throw new IOException("Expected word: " + (char)token);
+        }
         return tokenizer.sval;
     }
-
-    private int readInt() {
-        assert (token == StreamTokenizer.TT_NUMBER) : "Expected number";
-        return (int) tokenizer.nval;
+    
+    private int readInt() throws IOException{
+        int token = tokenizer.nextToken();
+        if (token != StreamTokenizer.TT_NUMBER){
+            throw new IOException("Expected number: " + (char)token);
+        }
+        return (int)tokenizer.nval;
     }
 
-    private float readFloat() {
-        assert (token == StreamTokenizer.TT_NUMBER) : "Expected number";
-        return (float) tokenizer.nval;
+    private float readFloat() throws IOException{
+        int token = tokenizer.nextToken();
+        if (token != StreamTokenizer.TT_NUMBER){
+            throw new IOException("Expected number: " + (char)token);
+        }
+        return (float)tokenizer.nval;
     }
-
-    private int readAddr() {
-        assert (token == StreamTokenizer.TT_NUMBER) : "Expected number";
-        return (int) tokenizer.nval;
+    
+    private int readAddr() throws IOException {
+        int token = tokenizer.nextToken();
+        if (token != StreamTokenizer.TT_NUMBER){
+            throw new IOException("Expected number: " + (char)token);
+        }
+        return (int)tokenizer.nval;
     }
-
-    private void readEnd() {
-        assert (token == ';') : "Expected semicolon";
+    
+    private void readEnd() throws IOException{
+        int token = tokenizer.nextToken();
+        if (token != ';'){
+            throw new IOException((char)token + "Expected semicolon");
+        }
     }
 
     private Instruction readNext() throws IOException {

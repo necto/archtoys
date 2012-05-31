@@ -10,7 +10,6 @@
                 <exec.args>-classpath %classpath ru.mipt.archtoys.star.asm.Asm</exec.args>
                 <exec.executable>java</exec.executable>
                 <exec.classpathScope>runtime</exec.classpathScope>
-                <exec.workingdir>/home/genius/NetBeansProjects/archtoys/star.asm</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -24,7 +23,6 @@
                 <exec.executable>java</exec.executable>
                 <exec.classpathScope>runtime</exec.classpathScope>
                 <jpda.listen>true</jpda.listen>
-                <exec.workingdir>/home/genius/NetBeansProjects/archtoys/star.asm</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -37,7 +35,6 @@
                 <exec.args>${profiler.args} -classpath %classpath ru.mipt.archtoys.star.asm.Asm</exec.args>
                 <exec.executable>${profiler.java}</exec.executable>
                 <profiler.action>profile</profiler.action>
-                <exec.workingdir>/home/genius/NetBeansProjects/archtoys/star.asm</exec.workingdir>
             </properties>
         </action>
     </actions>
