@@ -6,6 +6,7 @@ package ru.mipt.archtoys.star.compiler;
 
 import gramm.analysis.DepthFirstAdapter;
 import gramm.node.*;
+import java.util.List;
 
 /**
  *
@@ -72,11 +73,11 @@ public class CodeGen extends DepthFirstAdapter
 		return types.getType(n).sign();
 	}
 	
-	@Override
-	public void defaultIn(Node node)
-    {
+//	@Override
+//	public void defaultIn(Node node) //for debug purposes
+//    {
 //        System.out.println (node.getClass().toString() + " " + node.toString());
-    }
+//    }
 	
 	@Override
 	public void defaultOut (Node node)
@@ -90,6 +91,13 @@ public class CodeGen extends DepthFirstAdapter
         defaultIn(node);
 		asm = "";
 		pushCommand ("alloc", vars.getMemSize());
+		for (MemTable.Array arr : vars.getArrays())
+		{
+			pushCommand("ldci", arr.length());
+			pushCommand("lda", arr.adress);
+			pushCommand("ma" + arr.type.sign());
+		}
+		
         defaultOut(node);
     }
 
@@ -243,7 +251,7 @@ public class CodeGen extends DepthFirstAdapter
             node.getExprList().apply(this);
         }
 		String name = ((AArrName) (node.getArrName())).getWord().getText();
-		assert (vars.getArrayd(name) > 0);
+		assert (vars.isArray(name));
 		
 		int nIndexes = countExprs (node.getExprList());
 		while (0<--nIndexes)
