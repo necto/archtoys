@@ -14,16 +14,17 @@ public class Asm
     
     public static void main( String[] args )
     {
-        try {
+        if ( args.length > 0)
+        {
             fileName = args[0];
-        } catch( ArrayIndexOutOfBoundsException ex) {
-            System.err.println( "No input file specified");
+        } else {
+            throw new Error("No input file specified");
         }
         reader = new Reader( fileName);
         LinkedList<Instruction> list = reader.readAll();
         Iterator<Instruction> iter = list.iterator();
         while ( iter.hasNext()){
-            iter.next().print();
+            System.out.println( iter.next().toString());
         }
     }
 }

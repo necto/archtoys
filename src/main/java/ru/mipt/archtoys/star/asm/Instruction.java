@@ -135,11 +135,16 @@ public class Instruction {
         }
     }
     
-    public void print(){
-        System.out.print(defs);
-        if (defs.hasOper()){
-            System.out.print(" " + oper);
+    @Override
+    public String toString(){
+        String res = new String();
+        
+        res += defs;
+        if ( defs.hasOper())        
+        {
+            res += " " + oper;
         }
-        System.out.println();
+        
+        return res;
     }
 }
