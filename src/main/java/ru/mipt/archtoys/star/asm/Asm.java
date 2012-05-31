@@ -1,5 +1,6 @@
 package ru.mipt.archtoys.star.asm;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -9,7 +10,7 @@ import java.util.LinkedList;
  */
 public class Asm 
 {
-    private static Reader reader;
+    private static AsmReader reader;
     private static String fileName;
     
     public static void main( String[] args )
@@ -20,7 +21,10 @@ public class Asm
         } else {
             throw new Error("No input file specified");
         }
-        reader = new Reader( fileName);
+        
+        File file = new File(fileName);
+               
+        reader = new AsmReader( file);
         LinkedList<Instruction> list = reader.readAll();
         Iterator<Instruction> iter = list.iterator();
         while ( iter.hasNext()){

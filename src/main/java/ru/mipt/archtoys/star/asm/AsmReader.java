@@ -4,62 +4,63 @@
  */
 package ru.mipt.archtoys.star.asm;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StreamTokenizer;
+import java.io.*;
 import java.util.LinkedList;
 
 /**
  *
  * @author genius
  */
-public class Reader {
+public class AsmReader {
 
-    private static FileReader inputStream = null;
     private static StreamTokenizer tokenizer = null;
     private static int token = 0;
 
-    public Reader(String fileName) {
+    public AsmReader(File file) {
         try {
-            inputStream = new FileReader(fileName);
-            tokenizer = new StreamTokenizer(inputStream);
+            tokenizer = new StreamTokenizer(new FileReader(file));
             tokenizer.eolIsSignificant(true);
         } catch (IOException ex) {
             System.err.println("Caught IOException while init: " + ex.getMessage());
         }
     }
-    
-    private String readMnemo() throws IOException{
-        if (token != StreamTokenizer.TT_WORD){
-            throw new IOException("Expected word: " + (char)token);
+
+    public AsmReader(String s) {
+        tokenizer = new StreamTokenizer(new StringReader(s));
+        tokenizer.eolIsSignificant(true);
+    }
+
+    private String readMnemo() throws IOException {
+        if (token != StreamTokenizer.TT_WORD) {
+            throw new IOException("Expected word: " + (char) token);
         }
         return tokenizer.sval;
     }
-    
-    private int readInt() throws IOException{
-        if (token != StreamTokenizer.TT_NUMBER){
-            throw new IOException("Expected number: " + (char)token);
+
+    private int readInt() throws IOException {
+        if (token != StreamTokenizer.TT_NUMBER) {
+            throw new IOException("Expected number: " + (char) token);
         }
-        return (int)tokenizer.nval;
+        return (int) tokenizer.nval;
     }
 
-    private float readFloat() throws IOException{
-        if (token != StreamTokenizer.TT_NUMBER){
-            throw new IOException("Expected number: " + (char)token);
+    private float readFloat() throws IOException {
+        if (token != StreamTokenizer.TT_NUMBER) {
+            throw new IOException("Expected number: " + (char) token);
         }
-        return (float)tokenizer.nval;
+        return (float) tokenizer.nval;
     }
-    
+
     private int readAddr() throws IOException {
-        if (token != StreamTokenizer.TT_NUMBER){
-            throw new IOException("Expected number: " + (char)token);
+        if (token != StreamTokenizer.TT_NUMBER) {
+            throw new IOException("Expected number: " + (char) token);
         }
-        return (int)tokenizer.nval;
+        return (int) tokenizer.nval;
     }
-    
-    private void readEnd() throws IOException{
-        if (token != ';'){
-            throw new IOException((char)token + "Expected semicolon");
+
+    private void readEnd() throws IOException {
+        if (token != ';') {
+            throw new IOException((char) token + "Expected semicolon");
         }
     }
 
@@ -114,9 +115,8 @@ public class Reader {
             while (token != StreamTokenizer.TT_EOF) {
                 token = tokenizer.nextToken();
                 instr = readNext();
-                if ( instr != null)
-                {
-                    list.add( instr);
+                if (instr != null) {
+                    list.add(instr);
                 }
             }
         } catch (IOException ex) {
