@@ -1,0 +1,53 @@
+A minimum list of instructions of StAr:
+
+Note: notation prefix(var1|var2)postfix will be used below to denote 2
+variants of command: prefixvar1postfix/prefixvar2postfix.
+
+(derived from task.txt)
+
+alloc <size>		--  Stack frame allocation on the top of the stack, with
+						given <size>.
+
+ldc(i|d) <const>	--  Load a constant into stack top.
+
+ld(i|d)	<shift>		--  Load a value from <frame-pointer> + <shift> into the
+						top of the stack.
+
+lda <shift>			--  Produce an adress of the cell <frame-pointer> +
+						<shift>.
+
+lds(i|d)			--  Read a value by the adress in the top of the stack. The
+						adress was produced by the lda command.
+
+st(i|d)				--  Write a second value from the top of the stack by an
+						adress in the top. Saves the top of the stack.
+
+scr					--  Drop the top value.
+
+index				--  Form an array adress by begin-adress(produced by lda)
+						and element index. Machine must check array borders.
+
+add					--  stack.push (stack.pop + stack.pop)
+
+sub					--  stack.push (stack.pop - stack.pop)
+
+mul					--  stack.push (stack.pop * stack.pop)
+
+div					--  stack.push (stack.pop / stack.pop)
+
+rem					--  stack.push (stack.pop mod stack.pop)
+
+chs					--  stack.push (- stack.pop)
+
+fi2d				--  Change the type of the top element from float to
+						integer.
+
+fd2f				--  Change the type of the top element from integer to
+						float.
+
+ms					--  Prepare to enter to a procedure. Mark stack by pushing
+						to it a special element, designating a separate area
+						of arguments.
+
+call				--  Call a user-defined or system function, such as print.
+
