@@ -8,7 +8,7 @@ public class App
 {
 	private static boolean isNotAnOption (String opt)
 	{
-		return !opt.matches("-[a-z]+");
+		return !opt.matches("-[-a-z]+");
 	}
 	
 	private static void doCompile (Reader input, Writer output)

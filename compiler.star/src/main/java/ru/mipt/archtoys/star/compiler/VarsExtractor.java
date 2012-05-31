@@ -38,7 +38,7 @@ public class VarsExtractor extends DepthFirstAdapter
 	
 	private void handleVar (String name, int arrayd) throws IncompatibleUsage
 	{
-			table.registerVar(name, induceType(name), arrayd);
+		table.registerVar(name, induceType(name), arrayd);
 	}
 	
 	@Override

@@ -27,7 +27,7 @@ public class TypeDeriver extends DepthFirstAdapter
 		this.vars = vars;
 		this.funcs = funcs;
 	}
-	
+		
 	public Type getType (Node n)
 	{
 		return types.get(n);

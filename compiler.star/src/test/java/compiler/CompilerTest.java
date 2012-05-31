@@ -79,21 +79,29 @@ public class CompilerTest extends TestCase {
 		Compiler c = new Compiler();
 		assertEquals ("Rvalue reference",
 					  canonize(c.compile("print f[34] + i[3]")),
-					  canonize("alloc 300; ms; ldci 34; lda 0; index; ldsd;" +
-							   "ldci 3; lda 200; index; ldsi; fi2d; addd; ldci 1;" +
-							   "call;"));
+					  canonize("alloc 302; ldci 100; lda 0; mad; ldci 100;"
+						    + "lda 201; mai; ms; ldci 34; lda 0; index; ldsd;"
+						    + "ldci 3; lda 201; index; ldsi; fi2d; addd; ldci 1;"
+						    + " call;"));
+		assertEquals ("Several references",
+					  canonize(c.compile("print a[1], a[0]")),
+					  canonize("alloc 201; ldci 100; lda 0; mad; ms; ldci 1;"
+						    + " lda 0; index; ldsd; ldci 0; lda 0; index; ldsd;"
+						    + " ldci 1; call;"));
 		assertEquals ("Lvalue reference",
 					  canonize(c.compile("i[2] = 15/4")),
-					  canonize("alloc 100; ldci 15; ldci 4; divi; ldci 2; lda 0;" +
-							   "index; sti;"));
+					  canonize("alloc 101; ldci 100; lda 0; mai; ldci 15;"
+						    + " ldci 4; divi; ldci 2; lda 0; index; sti;"));
 		assertEquals ("Multidimensional",
 					  canonize(c.compile("print al[32, 5-2] *" + 
 										 "igro[43/2, 11/3, 54+6]")),
-					  canonize("alloc 1020000; ms; ldci 32; ldci 5; ldci 2; subi;" +
-							   "ldci 100; muli; addi; lda 0; index; ldsd; ldci 43;" + 
-							   "ldci 2; divi; ldci 11; ldci 3; divi; ldci 54; ldci 6;" +
-							   "addi; ldci 100; muli; addi; ldci 100; muli; addi;" +
-							   "lda 20000; index; ldsi; fi2d; muld; ldci 1; call;"));
+					  canonize("alloc 1020002; ldci 1000000; lda 20001; mai;"
+						    + " ldci 10000; lda 0; mad; ms; ldci 32; ldci 5;"
+						    + " ldci 2; subi; ldci 100; muli; addi; lda 0; index;"
+						    + " ldsd; ldci 43; ldci 2; divi; ldci 11; ldci 3; divi;"
+						    + " ldci 54; ldci 6; addi; ldci 100; muli; addi;"
+						    + " ldci 100; muli; addi; lda 20001; index; ldsi;"
+						    + " fi2d; muld; ldci 1; call; "));
     }
 //	@Test(expected=MemTable.IncompatibleUsage.class)
 //	public void testDifDefDetector() throws Exception
@@ -112,9 +120,10 @@ public class CompilerTest extends TestCase {
 		assertEquals ("2 operations",
 					  canonize(c.compile("a = 30*i - 4 \n" +
 										 "print 54, 18/b[3] mod 3")),
-					  canonize("alloc 203; ldci 30; lda 2; ldsi; muli; ldci 4;" + 
-							   "subi; fi2d; lda 0; std; ms; ldci 54; ldci 18; " +
-							   "fi2d; ldci 3; lda 3; index; ldsd; divd; fd2i; " +
-							   "ldci 3; rem; ldci 1; call;"));
+					  canonize("alloc 204; ldci 100; lda 3; mad; ldci 30;"
+						    + " lda 2; ldsi; muli; ldci 4; subi; fi2d; lda 0;"
+						    + " std; ms; ldci 54; ldci 18; fi2d; ldci 3; lda 3;"
+						    + " index; ldsd; divd; fd2i; ldci 3; rem; ldci 1;"
+						    + " call;"));
 	}
 }
