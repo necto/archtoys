@@ -5,10 +5,12 @@
  */
 package ru.mipt.archtoys.yapm.bt;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.LinkedList;
-import ru.mipt.archtoys.star.asm.Instruction;
 import ru.mipt.archtoys.star.asm.AsmReader;
+import ru.mipt.archtoys.star.asm.Instruction;
+import ru.mipt.archtoys.yapm.bt.Operation.MacroOperation;
 
 /**
  *
@@ -19,32 +21,33 @@ public class Translator {
     private static String fileName;
     private static LinkedList<Instruction> starAsm;
     private static LinkedList<Operation> yapmIr;
+    private static LinkedList<MacroOperation> yapmIrWide;
 
     /**
-     * Simple translation from star to yasm.
-     * Construct eqivalents of all star operation with realization
-     * of stack on memory
-     */
-    private static void lowering() {
-        Iterator<Instruction> iter = starAsm.iterator();
-        while (iter.hasNext()) {
-            Instruction instr = iter.next();
-            Operation oper = new Operation( instr);
-            yapmIr.add(oper);
-        }
-    }
-
-    /**
-     * Main translation process 
+     * Main translation process
      */
     private static void runTranslation() {
-        /* Process input asm file */
+        /*
+         * Process input asm file
+         */
         starAsm = new LinkedList<Instruction>();
-        AsmReader asmReader = new AsmReader(fileName);
+        File file = new File(fileName);
+        AsmReader asmReader = new AsmReader(file);
         starAsm = asmReader.readAll();
 
-        /* Lowering from star asm to yapm operations */
-        lowering();
+        /**
+         * Simple translation from star to yasm. Construct eqivalents of all
+         * star operation with realization of stack on memory
+         */
+        yapmIr = new LinkedList<Operation>();
+        Lowering lowir = new Lowering(starAsm);
+        yapmIr = lowir.runLowering();
+        
+        /**
+         * Form macrooperations
+         */
+        Scheduler sched = new Scheduler();
+        yapmIrWide = sched.simpleScheduling(yapmIr);
     }
 
     public static void main(String[] args) {
@@ -61,111 +64,20 @@ public class Translator {
          * Start translation
          */
         runTranslation();
+
+        /*
+         * Output
+         */
+        outResult();
     }
 
-    /**
-     * Object class
-     */
-    private static abstract class Obj {
-
-        protected enum ObjType {
-
-            CONST,
-            MEM,
-            REG,
-            NONE
-        }
-        protected ObjType type = ObjType.NONE;
-    }
-
-    /*
-     * Constant object class
-     */
-    private static abstract class ObjConst extends Obj {
-
-        protected enum ObjConstType {
-
-            INT,
-            FLOAT,
-            NONE
-        }
-        protected ObjConstType constType = ObjConstType.NONE;
-
-        public ObjConst() {
-            type = ObjType.CONST;
-        }
-    }
-
-    /*
-     * Integer constant object class
-     */
-    private class ObjConstInt extends ObjConst {
-
-        public ObjConstInt() {
-            constType = ObjConstType.INT;
-        }
-    }
-
-    /*
-     * Float constant object class
-     */
-    private class ObjConstFloat extends ObjConst {
-
-        public ObjConstFloat() {
-            constType = ObjConstType.FLOAT;
-        }
-    }
-
-    /*
-     * Memory object class
-     */
-    private class ObjMem extends Obj {
-
-        public ObjMem() {
-            type = ObjType.MEM;
-        }
-    }
-
-    /*
-     * Register object class
-     */
-    private class ObjReg extends Obj {
-
-        public ObjReg() {
-            type = ObjType.REG;
-        }
-    }
-
-    /**
-     * Operation class - internal representation of operation
-     */
-    private static class Operation {
-
-        public enum defs {
-            LDC,
-            LD,
-            ST,
-            LDA,
-            STA,
-            CALL,
-            ADD,
-            SUB,
-            MUL,
-            DIV,
-            REM,
-            NEG,
-            FD2I,
-            FI2D
-        }
-        
-        public LinkedList<Obj> args;
-        public LinkedList<Obj> res;
-
-        public Operation() {
-        }
-        
-        public Operation( Instruction instr) {
-            
+    private static void outResult() {
+        /*
+         * Ouput wide IR to stdout
+         */
+        Iterator<MacroOperation> iter = yapmIrWide.iterator();
+        while (iter.hasNext()) {
+            System.out.println(iter.next().toString());
         }
     }
 }
