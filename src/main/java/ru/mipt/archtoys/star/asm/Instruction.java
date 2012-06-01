@@ -139,6 +139,8 @@ public class Instruction {
         STI(0, OperType.INT),
         STD(0, OperType.FLOAT),
         ALLOC(0, OperType.INT),
+        MRI(0, OperType.NONE),
+        MRF(0, OperType.NONE),
         SCR(0, OperType.NONE),
         LDA(0, OperType.ADDR),
         INDEX(0, OperType.NONE),
