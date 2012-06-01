@@ -33,14 +33,13 @@ public class InstructionTest extends TestCase {
         System.out.println("Testing instruction print");
         Instruction instance = new Instruction("ldci");
         ((Instruction.OperInteger)instance.oper).value = 10;
-        assertEquals("Integer instruction", "LDCI 10", instance.toString());
+        assertEquals("Integer instruction", "LDCI 10;", instance.toString());
         instance = new Instruction("lda");
         ((Instruction.OperAddr)instance.oper).value = 16000;
-        assertEquals("Address instruction", "LDA 16000", instance.toString());
+        assertEquals("Address instruction", "LDA 16000;", instance.toString());
         instance = new Instruction("std");
-        ((Instruction.OperFloat)instance.oper).value = (float) 0.1;
-        assertEquals("Float instruction", "STD 0.1", instance.toString());
+        assertEquals("Float instruction", "STD;", instance.toString());
         instance = new Instruction("index");
-        assertEquals("Simple instruction", "INDEX", instance.toString());    
+        assertEquals("Simple instruction", "INDEX;", instance.toString());    
     }
 }

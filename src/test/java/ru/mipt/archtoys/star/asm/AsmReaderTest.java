@@ -32,7 +32,7 @@ public class AsmReaderTest extends TestCase {
      */
     public void testReadAll() {
         System.out.println("Testing reading assembler");
-        String testString = "ldci 2;\n sti 1;\n index;\n ldcd 1.0;\n";
+        String testString = "ldci 2;\n sti;\n index;\n ldcd 1.0;\n";
         AsmReader instance = new AsmReader(testString);
         LinkedList<Instruction> expResult = new LinkedList<Instruction>();
         LinkedList<Instruction> result = instance.readAll();
@@ -43,7 +43,6 @@ public class AsmReaderTest extends TestCase {
         ((Instruction.OperInteger) instr.oper).value = 2;
         expResult.add(instr);
         instr = new Instruction("sti");
-        ((Instruction.OperInteger) instr.oper).value = 1;
         expResult.add(instr);
         instr = new Instruction("index");
         expResult.add(instr);

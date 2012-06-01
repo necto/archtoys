@@ -59,7 +59,7 @@ public class Lowering {
                 lowirAlloc(instr);
                 break;
             case MRI:
-            case MRF:
+            case MRD:
                 lowirMa(instr);
                 break;
             case SCR:
@@ -71,13 +71,19 @@ public class Lowering {
             case INDEX:
                 lowirIndex(instr);
                 break;
-            case ADD:
-            case SUB:
-            case MUL:
-            case DIV:
+            case ADDI:
+            case ADDD:
+            case SUBI:
+            case SUBD:
+            case MULI:
+            case MULD:
+            case DIVI:
+            case DIVD:
             case REM:
                 lowirArith(instr);
-            case CHS:
+                break;
+            case CHSI:
+            case CHSD:
                 lowirChs(instr);
             case FI2D:
             case FD2I:
@@ -99,17 +105,15 @@ public class Lowering {
          * Construct load of constant to register.
          */
         Operation oper = new Operation("ldc");
-        int tosIncr = 0;
+        int tosIncr = getStackOperSize(instr);
         switch (instr.defs.getOperType()) {
         case INT:
             int valueInt = ((OperInteger) instr.oper).value;
             oper.args.add(new ObjConstInt(valueInt));
-            tosIncr = 1;
             break;
         case FLOAT:
             float valueFloat = ((OperFloat) instr.oper).value;
             oper.args.add(new ObjConstFloat(valueFloat));
-            tosIncr = 2;
             break;
         default:
             assert false;
@@ -135,17 +139,7 @@ public class Lowering {
          * Construct load from address 'shift' to register
          */
         Operation oper = new Operation("ld");
-        int tosIncr = 0;
-        switch (instr.defs.getOperType()) {
-        case INT:
-            tosIncr = 1;
-            break;
-        case FLOAT:
-            tosIncr = 2;
-            break;
-        default:
-            assert false;
-        }
+        int tosIncr = getStackOperSize(instr);
         int shift = ((OperAddr) instr.oper).value;
         int reg = nextReg();
         oper.args.add(new ObjMem(shift));
@@ -169,17 +163,7 @@ public class Lowering {
          * Construct load from address 'tos' to register
          */
         Operation oper = new Operation("ld");
-        int tosIncr = 0;
-        switch (instr.defs.getOperType()) {
-        case INT:
-            tosIncr = 1;
-            break;
-        case FLOAT:
-            tosIncr = 2;
-            break;
-        default:
-            assert false;
-        }
+        int tosIncr = getStackOperSize(instr);
         int reg = nextReg();
         oper.args.add(new ObjMem(tosAddr - 2)); // Address is 2byte wide
         oper.res.add(new ObjReg(reg));
@@ -206,7 +190,7 @@ public class Lowering {
          */
         oper = new Operation("st");
         oper.args.add(new ObjReg(reg2));
-        oper.res.add(new ObjMem(tosAddr));
+        oper.res.add(new ObjMem(tosAddr - 2));
         yapmIr.add(oper);
         /*
          * Correct tos address
@@ -227,17 +211,7 @@ public class Lowering {
         /*
          * Construct load value from address 'tos-1' to register
          */
-        int tosIncr = 0;
-        switch (instr.defs.getOperType()) {
-        case INT:
-            tosIncr = 1;
-            break;
-        case FLOAT:
-            tosIncr = 2;
-            break;
-        default:
-            assert false;
-        }
+        int tosIncr = getStackOperSize(instr);
         oper = new Operation("ld");
         int reg1 = nextReg();
         oper.args.add(new ObjMem(tosAddr - 2 - tosIncr)); // Address is 2byte wide
@@ -309,7 +283,44 @@ public class Lowering {
     }
 
     private void lowirArith(Instruction instr) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        String arithName = instr.defs.toString().substring(0, 3);
+        int tosIncr = getStackOperSize(instr);
+        /*
+         * Construct load from 'tos-1' to register
+         */
+        Operation oper = new Operation("ld");
+        int reg = nextReg();
+        oper.args.add(new ObjMem(tosAddr - tosIncr * 2));
+        oper.res.add(new ObjReg(reg));
+        yapmIr.add(oper);
+        /*
+         * Construct load from 'tos' to register
+         */
+        oper = new Operation("ld");
+        int reg1 = nextReg();
+        oper.args.add(new ObjMem(tosAddr - tosIncr));
+        oper.res.add(new ObjReg(reg));
+        yapmIr.add(oper);
+        /*
+         * Construct arithm operation
+         */
+        oper = new Operation(arithName);
+        int reg2 = nextReg();
+        oper.args.add(new ObjReg(reg));
+        oper.args.add(new ObjReg(reg1));
+        oper.res.add(new ObjReg(reg2));
+        yapmIr.add(oper);
+        /*
+         * Store result to memory
+         */
+        oper = new Operation("st");
+        oper.args.add(new ObjMem(tosAddr - tosIncr * 2));
+        oper.args.add(new ObjReg(reg2));
+        yapmIr.add(oper);
+        /*
+         * Correct tos address
+         */
+        tosAddr -= tosIncr;
     }
 
     private void lowirChs(Instruction instr) {
@@ -330,5 +341,36 @@ public class Lowering {
 
     private int nextReg() {
         return regNum++;
+    }
+
+    private int getStackOperSize(Instruction instr) {
+        switch (instr.defs) {
+        case LDCI:
+        case LDI:            
+        case LDSI:
+        case STI:
+        case MRI:
+        case ADDI:
+        case SUBI:
+        case MULI:
+        case DIVI:
+        case CHSI:
+            return 1;
+        case LDCD:
+        case LDD:            
+        case LDSD:
+        case STD:
+        case MRD:
+        case ADDD:
+        case SUBD:
+        case MULD:
+        case DIVD:
+        case CHSD:
+            return 2;
+        default:
+            assert false;
+        }
+        assert false;
+        return 0;
     }
 }
