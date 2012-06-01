@@ -281,7 +281,27 @@ public class Lowering {
     }
 
     private void lowirLdAddr(Instruction instr) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        /*
+         * Construct load of address constant to register.
+         */
+        Operation oper = new Operation("ldc");
+        int tosIncr = 2;
+        int addr = ((OperAddr) instr.oper).value;
+        int reg = nextReg();
+        oper.res.add(new ObjConstInt(addr));
+        oper.res.add(new ObjReg(reg));
+        yapmIr.add(oper);
+        /*
+         * Construct store from register to 'tos' address
+         */
+        oper = new Operation("st");
+        oper.args.add(new ObjReg(reg));
+        oper.res.add(new ObjMem(tosAddr));
+        yapmIr.add(oper);
+        /*
+         * Correct tos address
+         */
+        tosAddr += tosIncr;
     }
 
     private void lowirIndex(Instruction instr) {
