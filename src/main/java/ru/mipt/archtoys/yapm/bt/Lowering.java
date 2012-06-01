@@ -299,7 +299,7 @@ public class Lowering {
         oper = new Operation("ld");
         int reg1 = nextReg();
         oper.args.add(new ObjMem(tosAddr - tosIncr));
-        oper.res.add(new ObjReg(reg));
+        oper.res.add(new ObjReg(reg1));
         yapmIr.add(oper);
         /*
          * Construct arithm operation
