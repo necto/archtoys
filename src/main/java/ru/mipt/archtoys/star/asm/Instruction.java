@@ -136,8 +136,8 @@ public class Instruction {
         LDD(0, OperType.FLOAT),
         LDSI(0, OperType.INT),
         LDSD(0, OperType.FLOAT),
-        STI(0, OperType.INT),
-        STD(0, OperType.FLOAT),
+        STI(0, OperType.NONE),
+        STD(0, OperType.NONE),
         ALLOC(0, OperType.INT),
         MRI(0, OperType.NONE),
         MRF(0, OperType.NONE),
@@ -210,7 +210,9 @@ public class Instruction {
         if (defs.hasOper()) {
             res += " " + oper;
         }
-
+        
+        res += ";";
+        
         return res;
     }
 
