@@ -13,13 +13,14 @@ import ru.mipt.archtoys.yapm.bt.Operation.MacroOperation;
  * @author danisimo
  */
 class Scheduler {
+    private Ir ir;
 
-    public Scheduler() {
+    public Scheduler(Ir i_r) {
+        ir = i_r;
     }
 
-    LinkedList<MacroOperation> simpleScheduling(LinkedList<Operation> ir) {
-        LinkedList<MacroOperation> wideIr = new LinkedList<MacroOperation>();
-        Iterator<Operation> iter = ir.iterator();
+    public void simpleScheduling() {
+        Iterator<Operation> iter = ir.seq.iterator();
 
         while (iter.hasNext()) {
             MacroOperation macro = new MacroOperation();
@@ -29,8 +30,7 @@ class Scheduler {
                 unit = 0;
             }
             macro.opers[unit] = oper;
-            wideIr.add(macro);
+            ir.seqWide.add(macro);
         }
-        return wideIr;
     }
 }

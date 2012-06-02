@@ -19,9 +19,7 @@ import ru.mipt.archtoys.yapm.bt.Operation.MacroOperation;
 public class Translator {
 
     private static String fileName;
-    private static LinkedList<Instruction> starAsm;
-    private static LinkedList<Operation> yapmIr;
-    private static LinkedList<MacroOperation> yapmIrWide;
+    private static Ir ir = new Ir();
 
     /**
      * Main translation process
@@ -30,24 +28,24 @@ public class Translator {
         /*
          * Process input asm file
          */
-        starAsm = new LinkedList<Instruction>();
+        ir.starAsm = new LinkedList<Instruction>();
         File file = new File(fileName);
         AsmReader asmReader = new AsmReader(file);
-        starAsm = asmReader.readAll();
+        ir.starAsm = asmReader.readAll();
 
         /**
          * Simple translation from star to yasm. Construct eqivalents of all
          * star operation with realization of stack on memory
          */
-        yapmIr = new LinkedList<Operation>();
-        Lowering lowir = new Lowering(starAsm);
-        yapmIr = lowir.runLowering();
+        ir.seq = new LinkedList<Operation>();
+        Lowering lowir = new Lowering(ir);
+        lowir.runLowering();
         
         /**
          * Form macrooperations
          */
-        Scheduler sched = new Scheduler();
-        yapmIrWide = sched.simpleScheduling(yapmIr);
+        Scheduler sched = new Scheduler(ir);
+        sched.simpleScheduling();
     }
 
     public static void main(String[] args) {
@@ -75,7 +73,7 @@ public class Translator {
         /*
          * Ouput wide IR to stdout
          */
-        Iterator<MacroOperation> iter = yapmIrWide.iterator();
+        Iterator<MacroOperation> iter = ir.seqWide.iterator();
         while (iter.hasNext()) {
             System.out.println(iter.next().toString());
         }
