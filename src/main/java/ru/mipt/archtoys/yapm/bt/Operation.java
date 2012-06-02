@@ -26,13 +26,13 @@ class Operation {
             exeUnit = unit;
         }
     }
-    public LinkedList<Obj> args;
-    public LinkedList<Obj> res;
+    public LinkedList<Op> args;
+    public LinkedList<Op> res;
     private Defs defs;
 
     public Operation(String name) {
-        args = new LinkedList<Obj>();
-        res = new LinkedList<Obj>();
+        args = new LinkedList<Op>();
+        res = new LinkedList<Op>();
         defs = Defs.valueOf(name.toUpperCase());
     }
     
@@ -46,11 +46,11 @@ class Operation {
 
         str += defs;
 
-        LinkedList<Obj> allArgs = new LinkedList<Obj>();
+        LinkedList<Op> allArgs = new LinkedList<Op>();
         allArgs.addAll(args);
         allArgs.addAll(res);
 
-        Iterator<Obj> iter = allArgs.iterator();
+        Iterator<Op> iter = allArgs.iterator();
         if (iter.hasNext()) {
             str += " ";
         }

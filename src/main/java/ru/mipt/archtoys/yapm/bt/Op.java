@@ -1,6 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Operand class.
+ * Describes different types of operands in operations
+ * used in binary translation
  */
 package ru.mipt.archtoys.yapm.bt;
 
@@ -9,34 +10,34 @@ package ru.mipt.archtoys.yapm.bt;
  * @author danisimo
  */
 /**
- * Object class
+ * Operand class
  */
-abstract class Obj {
+abstract class Op {
 
-    protected enum ObjType {
+    protected enum OpType {
 
         CONST, MEM, REG, NONE
     }
-    protected ObjType type = ObjType.NONE;
+    protected OpType type = OpType.NONE;
 
     @Override
     public abstract String toString();
 
     /*
-     * Constant object class
+     * Constant operand class
      */
-    public static abstract class ObjConst extends Obj {
+    public static abstract class OpConst extends Op {
 
-        protected enum ObjConstType {
+        protected enum OpConstType {
 
             INT,
             FLOAT,
             NONE
         }
-        protected ObjConstType constType = ObjConstType.NONE;
+        protected OpConstType constType = OpConstType.NONE;
 
-        public ObjConst() {
-            type = ObjType.CONST;
+        public OpConst() {
+            type = OpType.CONST;
         }
 
         @Override
@@ -44,18 +45,18 @@ abstract class Obj {
     }
 
     /*
-     * Integer constant object class
+     * Integer constant operand class
      */
-    public static class ObjConstInt extends ObjConst {
+    public static class OpConstInt extends OpConst {
 
         public int value;
 
-        public ObjConstInt() {
+        public OpConstInt() {
             this(0);
         }
 
-        public ObjConstInt(int val) {
-            constType = ObjConstType.INT;
+        public OpConstInt(int val) {
+            constType = OpConstType.INT;
             value = val;
         }
 
@@ -66,18 +67,18 @@ abstract class Obj {
     }
 
     /*
-     * Float constant object class
+     * Float constant operand class
      */
-    public static class ObjConstFloat extends ObjConst {
+    public static class OpConstFloat extends OpConst {
 
         public float value;
 
-        public ObjConstFloat() {
+        public OpConstFloat() {
             this(0);
         }
 
-        public ObjConstFloat(float val) {
-            constType = ObjConstType.FLOAT;
+        public OpConstFloat(float val) {
+            constType = OpConstType.FLOAT;
             value = val;
         }
 
@@ -88,18 +89,18 @@ abstract class Obj {
     }
 
     /*
-     * Memory object class
+     * Memory operand class
      */
-    public static class ObjMem extends Obj {
+    public static class OpMem extends Op {
 
         public int addr;
 
-        public ObjMem() {
+        public OpMem() {
             this(-1);
         }
 
-        public ObjMem(int val) {
-            type = ObjType.MEM;
+        public OpMem(int val) {
+            type = OpType.MEM;
             addr = val;
         }
 
@@ -110,18 +111,18 @@ abstract class Obj {
     }
 
     /*
-     * Register object class
+     * Register operand class
      */
-    public static class ObjReg extends Obj {
+    public static class OpReg extends Op {
 
         public int num;
 
-        public ObjReg() {
+        public OpReg() {
             this(-1);
         }
 
-        public ObjReg(int val) {
-            type = ObjType.REG;
+        public OpReg(int val) {
+            type = OpType.REG;
             num = val;
         }
 

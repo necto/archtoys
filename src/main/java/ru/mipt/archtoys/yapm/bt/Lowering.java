@@ -10,10 +10,10 @@ import ru.mipt.archtoys.star.asm.Instruction;
 import ru.mipt.archtoys.star.asm.Instruction.OperAddr;
 import ru.mipt.archtoys.star.asm.Instruction.OperFloat;
 import ru.mipt.archtoys.star.asm.Instruction.OperInteger;
-import ru.mipt.archtoys.yapm.bt.Obj.ObjConstFloat;
-import ru.mipt.archtoys.yapm.bt.Obj.ObjConstInt;
-import ru.mipt.archtoys.yapm.bt.Obj.ObjMem;
-import ru.mipt.archtoys.yapm.bt.Obj.ObjReg;
+import ru.mipt.archtoys.yapm.bt.Op.OpConstFloat;
+import ru.mipt.archtoys.yapm.bt.Op.OpConstInt;
+import ru.mipt.archtoys.yapm.bt.Op.OpMem;
+import ru.mipt.archtoys.yapm.bt.Op.OpReg;
 
 /**
  *
@@ -109,24 +109,24 @@ public class Lowering {
         switch (instr.defs.getOperType()) {
         case INT:
             int valueInt = ((OperInteger) instr.oper).value;
-            oper.args.add(new ObjConstInt(valueInt));
+            oper.args.add(new OpConstInt(valueInt));
             break;
         case FLOAT:
             float valueFloat = ((OperFloat) instr.oper).value;
-            oper.args.add(new ObjConstFloat(valueFloat));
+            oper.args.add(new OpConstFloat(valueFloat));
             break;
         default:
             assert false;
         }
         int reg = nextReg();
-        oper.res.add(new ObjReg(reg));
+        oper.res.add(new OpReg(reg));
         yapmIr.add(oper);
         /*
          * Construct store from register to 'tos' address
          */
         oper = new Operation("st");
-        oper.args.add(new ObjReg(reg));
-        oper.res.add(new ObjMem(tosAddr));
+        oper.args.add(new OpReg(reg));
+        oper.res.add(new OpMem(tosAddr));
         yapmIr.add(oper);
         /*
          * Correct tos address
@@ -142,15 +142,15 @@ public class Lowering {
         int tosIncr = getStackOperSize(instr);
         int shift = ((OperAddr) instr.oper).value;
         int reg = nextReg();
-        oper.args.add(new ObjMem(shift));
-        oper.res.add(new ObjReg(reg));
+        oper.args.add(new OpMem(shift));
+        oper.res.add(new OpReg(reg));
         yapmIr.add(oper);
         /*
          * Construct store from register to 'tos' address
          */
         oper = new Operation("st");
-        oper.args.add(new ObjReg(reg));
-        oper.res.add(new ObjMem(tosAddr));
+        oper.args.add(new OpReg(reg));
+        oper.res.add(new OpMem(tosAddr));
         yapmIr.add(oper);
         /*
          * Correct tos address
@@ -165,32 +165,32 @@ public class Lowering {
         Operation oper = new Operation("ld");
         int tosIncr = getStackOperSize(instr);
         int reg = nextReg();
-        oper.args.add(new ObjMem(tosAddr - 2)); // Address is 2byte wide
-        oper.res.add(new ObjReg(reg));
+        oper.args.add(new OpMem(tosAddr - 2)); // Address is 2byte wide
+        oper.res.add(new OpReg(reg));
         yapmIr.add(oper);
         /*
          * Construct load of 0 to base register
          */
         int reg1 = nextReg();
         oper = new Operation("ldc");
-        oper.args.add(new ObjConstInt(0));
-        oper.args.add(new ObjReg(reg1));
+        oper.args.add(new OpConstInt(0));
+        oper.args.add(new OpReg(reg1));
         yapmIr.add(oper);
         /*
          * Construct ld from address in index register to another register
          */
         oper = new Operation("lda");
         int reg2 = nextReg();
-        oper.args.add(new ObjReg(reg1));
-        oper.args.add(new ObjReg(reg));
-        oper.res.add(new ObjReg(reg2));
+        oper.args.add(new OpReg(reg1));
+        oper.args.add(new OpReg(reg));
+        oper.res.add(new OpReg(reg2));
         yapmIr.add(oper);
         /*
          * Construct st from register to 'tos' address
          */
         oper = new Operation("st");
-        oper.args.add(new ObjReg(reg2));
-        oper.res.add(new ObjMem(tosAddr - 2));
+        oper.args.add(new OpReg(reg2));
+        oper.res.add(new OpMem(tosAddr - 2));
         yapmIr.add(oper);
         /*
          * Correct tos address
@@ -205,8 +205,8 @@ public class Lowering {
          */
         Operation oper = new Operation("ld");
         int reg = nextReg();
-        oper.args.add(new ObjMem(tosAddr - 2)); // Address is 2byte wide
-        oper.res.add(new ObjReg(reg));
+        oper.args.add(new OpMem(tosAddr - 2)); // Address is 2byte wide
+        oper.res.add(new OpReg(reg));
         yapmIr.add(oper);
         /*
          * Construct load value from address 'tos-1' to register
@@ -214,25 +214,25 @@ public class Lowering {
         int tosIncr = getStackOperSize(instr);
         oper = new Operation("ld");
         int reg1 = nextReg();
-        oper.args.add(new ObjMem(tosAddr - 2 - tosIncr)); // Address is 2byte wide
+        oper.args.add(new OpMem(tosAddr - 2 - tosIncr)); // Address is 2byte wide
         // Value is 1-2byte
-        oper.res.add(new ObjReg(reg1));
+        oper.res.add(new OpReg(reg1));
         yapmIr.add(oper);
         /*
          * Construct load of 0 to base register
          */
         int reg2 = nextReg();
         oper = new Operation("ldc");
-        oper.args.add(new ObjConstInt(0));
-        oper.args.add(new ObjReg(reg1));
+        oper.args.add(new OpConstInt(0));
+        oper.args.add(new OpReg(reg1));
         yapmIr.add(oper);
         /*
          * Construct st from register to address in index
          */
         oper = new Operation("sta");
-        oper.args.add(new ObjReg(reg2));
-        oper.args.add(new ObjReg(reg1));
-        oper.args.add(new ObjReg(reg));
+        oper.args.add(new OpReg(reg2));
+        oper.args.add(new OpReg(reg1));
+        oper.args.add(new OpReg(reg));
         yapmIr.add(oper);
         /*
          * Correct tos address
@@ -262,15 +262,15 @@ public class Lowering {
         int tosIncr = 2;
         int addr = ((OperAddr) instr.oper).value;
         int reg = nextReg();
-        oper.res.add(new ObjConstInt(addr));
-        oper.res.add(new ObjReg(reg));
+        oper.res.add(new OpConstInt(addr));
+        oper.res.add(new OpReg(reg));
         yapmIr.add(oper);
         /*
          * Construct store from register to 'tos' address
          */
         oper = new Operation("st");
-        oper.args.add(new ObjReg(reg));
-        oper.res.add(new ObjMem(tosAddr));
+        oper.args.add(new OpReg(reg));
+        oper.res.add(new OpMem(tosAddr));
         yapmIr.add(oper);
         /*
          * Correct tos address
@@ -290,32 +290,32 @@ public class Lowering {
          */
         Operation oper = new Operation("ld");
         int reg = nextReg();
-        oper.args.add(new ObjMem(tosAddr - tosIncr * 2));
-        oper.res.add(new ObjReg(reg));
+        oper.args.add(new OpMem(tosAddr - tosIncr * 2));
+        oper.res.add(new OpReg(reg));
         yapmIr.add(oper);
         /*
          * Construct load from 'tos' to register
          */
         oper = new Operation("ld");
         int reg1 = nextReg();
-        oper.args.add(new ObjMem(tosAddr - tosIncr));
-        oper.res.add(new ObjReg(reg1));
+        oper.args.add(new OpMem(tosAddr - tosIncr));
+        oper.res.add(new OpReg(reg1));
         yapmIr.add(oper);
         /*
          * Construct arithm operation
          */
         oper = new Operation(arithName);
         int reg2 = nextReg();
-        oper.args.add(new ObjReg(reg));
-        oper.args.add(new ObjReg(reg1));
-        oper.res.add(new ObjReg(reg2));
+        oper.args.add(new OpReg(reg));
+        oper.args.add(new OpReg(reg1));
+        oper.res.add(new OpReg(reg2));
         yapmIr.add(oper);
         /*
          * Store result to memory
          */
         oper = new Operation("st");
-        oper.args.add(new ObjMem(tosAddr - tosIncr * 2));
-        oper.args.add(new ObjReg(reg2));
+        oper.args.add(new OpMem(tosAddr - tosIncr * 2));
+        oper.args.add(new OpReg(reg2));
         yapmIr.add(oper);
         /*
          * Correct tos address
