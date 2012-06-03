@@ -8,6 +8,8 @@ package ru.mipt.archtoys.yapm.bt;
 import java.io.*;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.cli.*;
 import ru.mipt.archtoys.star.asm.AsmReader;
 import ru.mipt.archtoys.star.asm.Instruction;
@@ -18,6 +20,7 @@ import ru.mipt.archtoys.yapm.bt.Operation.MacroOperation;
  * @author danisimo
  */
 public class Translator {
+
     private static Ir ir = new Ir();
     private static Reader input;
     private static Writer output;
@@ -77,12 +80,12 @@ public class Translator {
             }
 
             output = new OutputStreamWriter(out);
-            
+
             /*
              * Input
              */
             inpAsm();
-            
+
             /*
              * Run translation
              */
@@ -105,8 +108,13 @@ public class Translator {
          * Ouput wide IR to stdout
          */
         Iterator<MacroOperation> iter = ir.seqWide.iterator();
-        while (iter.hasNext()) {
-            System.out.println(iter.next().toString());
+        try {
+            while (iter.hasNext()) {
+                output.write(iter.next().toString() + "\n");
+            }
+            output.close();
+        } catch (IOException ex) {
+            System.err.println("Exception while output: " + ex.getMessage());
         }
     }
 

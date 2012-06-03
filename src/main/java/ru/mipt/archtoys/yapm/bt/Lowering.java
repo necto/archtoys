@@ -105,7 +105,6 @@ public class Lowering {
          * Construct load of constant to register.
          */
         Operation oper = new Operation("ldc");
-        int tosIncr = getStackOperSize(instr);
         switch (instr.defs.getOperType()) {
         case INT:
             int valueInt = ((OperInteger) instr.oper).value;
@@ -131,7 +130,7 @@ public class Lowering {
         /*
          * Correct tos address
          */
-        tosAddr += tosIncr;
+        tosAddr += 2;
     }
 
     private void lowirLdShift(Instruction instr) {
@@ -139,7 +138,6 @@ public class Lowering {
          * Construct load from address 'shift' to register
          */
         Operation oper = new Operation("ld");
-        int tosIncr = getStackOperSize(instr);
         int shift = ((OperAddr) instr.oper).value;
         int reg = nextReg();
         oper.args.add(new OpMem(shift));
@@ -155,7 +153,7 @@ public class Lowering {
         /*
          * Correct tos address
          */
-        tosAddr += tosIncr;
+        tosAddr += 2;
     }
 
     private void lowirLdDyn(Instruction instr) {
@@ -163,9 +161,8 @@ public class Lowering {
          * Construct load from address 'tos' to register
          */
         Operation oper = new Operation("ld");
-        int tosIncr = getStackOperSize(instr);
         int reg = nextReg();
-        oper.args.add(new OpMem(tosAddr - 2)); // Address is 2byte wide
+        oper.args.add(new OpMem(tosAddr - 2)); // Address
         oper.res.add(new OpReg(reg));
         ir.seq.add(oper);
         /*
@@ -195,8 +192,7 @@ public class Lowering {
         /*
          * Correct tos address
          */
-        tosIncr -= 2; // Address is removed from tos
-        tosAddr += tosIncr;
+        tosAddr += 0; // Address is removed from tos, new value added
     }
 
     private void lowirStDyn(Instruction instr) {
@@ -205,17 +201,15 @@ public class Lowering {
          */
         Operation oper = new Operation("ld");
         int reg = nextReg();
-        oper.args.add(new OpMem(tosAddr - 2)); // Address is 2byte wide
+        oper.args.add(new OpMem(tosAddr - 2)); // Address
         oper.res.add(new OpReg(reg));
         ir.seq.add(oper);
         /*
          * Construct load value from address 'tos-1' to register
          */
-        int tosIncr = getStackOperSize(instr);
         oper = new Operation("ld");
         int reg1 = nextReg();
-        oper.args.add(new OpMem(tosAddr - 2 - tosIncr)); // Address is 2byte wide
-        // Value is 1-2byte
+        oper.args.add(new OpMem(tosAddr - 4)); // Value
         oper.res.add(new OpReg(reg1));
         ir.seq.add(oper);
         /*
@@ -237,8 +231,7 @@ public class Lowering {
         /*
          * Correct tos address
          */
-        tosIncr = -tosIncr - 2; // Address is removed from tos
-        tosAddr += tosIncr;
+        tosAddr += -2;
     }
 
     private void lowirAlloc(Instruction instr) {
@@ -259,7 +252,6 @@ public class Lowering {
          * Construct load of address constant to register.
          */
         Operation oper = new Operation("ldc");
-        int tosIncr = 2;
         int addr = ((OperAddr) instr.oper).value;
         int reg = nextReg();
         oper.res.add(new OpConstInt(addr));
@@ -275,7 +267,7 @@ public class Lowering {
         /*
          * Correct tos address
          */
-        tosAddr += tosIncr;
+        tosAddr += 2;
     }
 
     private void lowirIndex(Instruction instr) {
@@ -284,13 +276,12 @@ public class Lowering {
 
     private void lowirArith(Instruction instr) {
         String arithName = instr.defs.toString().substring(0, 3);
-        int tosIncr = getStackOperSize(instr);
         /*
          * Construct load from 'tos-1' to register
          */
         Operation oper = new Operation("ld");
         int reg = nextReg();
-        oper.args.add(new OpMem(tosAddr - tosIncr * 2));
+        oper.args.add(new OpMem(tosAddr - 4)); // Arg 1
         oper.res.add(new OpReg(reg));
         ir.seq.add(oper);
         /*
@@ -298,7 +289,7 @@ public class Lowering {
          */
         oper = new Operation("ld");
         int reg1 = nextReg();
-        oper.args.add(new OpMem(tosAddr - tosIncr));
+        oper.args.add(new OpMem(tosAddr - 2)); // Arg 2
         oper.res.add(new OpReg(reg1));
         ir.seq.add(oper);
         /*
@@ -315,24 +306,22 @@ public class Lowering {
          */
         oper = new Operation("st");
         oper.args.add(new OpReg(reg2));
-        oper.args.add(new OpMem(tosAddr - tosIncr * 2));
+        oper.args.add(new OpMem(tosAddr - 4));
         ir.seq.add(oper);
         /*
          * Correct tos address
          */
-        tosAddr -= tosIncr;
+        tosAddr += -2;
     }
 
     private void lowirChs(Instruction instr) {
         String chsgnName = instr.defs.toString().substring(0, 3);
-        int tosIncr = getStackOperSize(instr);
-        Operation oper = new Operation("ld");
         /*
          * Construct load from 'tos' to register
          */
-        oper = new Operation("ld");
+        Operation oper = new Operation("ld");
         int reg1 = nextReg();
-        oper.args.add(new OpMem(tosAddr - tosIncr));
+        oper.args.add(new OpMem(tosAddr - 2));
         oper.res.add(new OpReg(reg1));
         ir.seq.add(oper);
         /*
@@ -348,25 +337,23 @@ public class Lowering {
          */
         oper = new Operation("st");
         oper.args.add(new OpReg(reg2));
-        oper.args.add(new OpMem(tosAddr - tosIncr));
+        oper.args.add(new OpMem(tosAddr - 2));
         ir.seq.add(oper);
         /*
          * Correct tos address
          */
-        tosAddr -= 0; // It remains the same
+        tosAddr += 0; // It remains the same
     }
 
     private void lowirConv(Instruction instr) {
         String convName = instr.defs.toString().substring(0, 3);
-        int argSize = (convName == "FI2D") ? 2 : 1;
-        int resSize = 3 - argSize;
         Operation oper = new Operation("ld");
         /*
          * Construct load from 'tos' to register
          */
         oper = new Operation("ld");
         int reg1 = nextReg();
-        oper.args.add(new OpMem(tosAddr - argSize));
+        oper.args.add(new OpMem(tosAddr - 2));
         oper.res.add(new OpReg(reg1));
         ir.seq.add(oper);
         /*
@@ -382,29 +369,32 @@ public class Lowering {
          */
         oper = new Operation("st");
         oper.args.add(new OpReg(reg2));
-        oper.args.add(new OpMem(tosAddr - argSize));
+        oper.args.add(new OpMem(tosAddr - 2));
         ir.seq.add(oper);
         /*
          * Correct tos address
          */
-        tosAddr += resSize - argSize;
+        tosAddr += 0;
     }
 
     private void lowirMs(Instruction instr) {
         msAddr = tosAddr;
-        tosAddr += 1;
+        tosAddr += 2;
     }
 
     private void lowirCall(Instruction instr) {
+        /*
+         * Construct call
+         */
         Operation oper = new Operation("call");
         assert(msAddr != -1);
-        oper.args.add(new OpMem(msAddr + 1));
-        oper.args.add(new OpMem(tosAddr - 1));
-        int procIndex = ((OperInteger)instr.oper).value;
-        assert(procIndex == 2); // Only print is supported now
-        oper.args.add(new OpConstInt(procIndex));
+        oper.args.add(new OpMem(msAddr + 2));
+        oper.args.add(new OpMem(tosAddr - 2));
         ir.seq.add(oper);
-        tosAddr = msAddr + ((procIndex < 2) ? 2 : 0);
+        /*
+         * Correct tos address
+         */
+        tosAddr = msAddr;
         msAddr = -1;
     }
 
