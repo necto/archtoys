@@ -47,8 +47,8 @@ public class FunTable
 
 	public FunTable()
 	{
-		put ("print", null, null, 1);
-		put ("sin", Type.FLOAT, Type.FLOAT, 2);
-		put ("abs", null, null, 3);
+		put ("sin", Type.FLOAT, Type.FLOAT, 0);
+		put ("cos", Type.FLOAT, Type.FLOAT, 1);
+		put ("print", null, null, 2);
 	}
 }
