@@ -401,9 +401,10 @@ public class Lowering {
         oper.args.add(new OpMem(msAddr + 1));
         oper.args.add(new OpMem(tosAddr - 1));
         int procIndex = ((OperInteger)instr.oper).value;
+        assert(procIndex == 2); // Only print is supported now
         oper.args.add(new OpConstInt(procIndex));
         ir.seq.add(oper);
-        tosAddr = msAddr;
+        tosAddr = msAddr + ((procIndex < 2) ? 2 : 0);
         msAddr = -1;
     }
 
