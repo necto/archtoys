@@ -18,30 +18,35 @@
 	  (:integer 1)
 	  (:undefined 1)
 	  (:float 2)
-	  (:adress 2))))
+	  (:address 2))))
 
 (defun make-int (val)    (make-unit :val val :type :integer))
 (defun make-float (val)  (make-unit :val val :type :float))
-(defun make-adress (val) (make-unit :val val :type :adress))
+(defun make-address (val) (make-unit :val val :type :address))
 
-(defun put-unit (adress unit)
-  (setf (aref *memory* adress) unit)
+(defun put-unit (address unit)
+  (setf (aref *memory* address) unit)
   (dotimes (i (1- (size unit)) unit)
-	(setf (aref *memory* (+ adress i 1))
+	(setf (aref *memory* (+ address i 1))
 		  (make-unit :val `(:for ,(unit-val unit)) :type :reserved))))
 
-(defun get-unit (adress &key expected)
-  (let ((unit (aref *memory* adress)))
+(defun get-unit (address &key expected)
+  (let ((unit (aref *memory* address)))
 	(if unit unit (make-unit :type (if expected expected :undefined) :val 0))))
 
-(defun put-array (adress type length)
-  (put-unit adress (make-unit :val length :type type :arr-start t)))
+(defun put-array-head (address type length)
+  (put-unit address (make-unit :val length :type type :arr-start t)))
 
-(defun index-array (adress i)
-  (let ((arr (get-unit adress)))
-	(assert (unit-arr-start arr))
-	(assert (< -1 i (unit-val arr)))
-	(make-adress (+ adress 1 (* (size (unit-type arr)) i)))))
+(defun index-array (address i)
+  (let ((head (get-unit address)))
+	(assert (unit-arr-start head))
+	(assert (< -1 i (unit-val head)))
+	(make-address (+ address (size head) (* (size (unit-type arr)) i)))))
+
+(defun get-topmost-less (address)
+  (if (eq (unit-type (get-unit address)) :reserved)
+	(get-topmost-less (1- address))
+	(values address (get-unit address))))
 
 ; Stack
 (defvar *stack-top* 0)
@@ -56,6 +61,11 @@
   (format t " resulting ~a ~%" (get-unit *stack-top* :expected expected))
   (format t "111 resulting ~a ~%" (get-unit *stack-top* :expected expected))
   (get-unit *stack-top* :expected expected))
+
+(defun st-pop-any ()
+  (multiple-value-bind (ntop val) (get-topmost-less (1- *stack-top*))
+	(setf *stack-top* ntop)
+	val))
 
 (defun reserve (size)
   (incf *stack-top* size))
@@ -98,6 +108,40 @@
   (ensure-type a b type "rema"
 	(make-unit :type type :val (rem (unit-val a) (unit-val b)))))
 
+; Functions
+
+(defun get-args (&optional got)
+  (let ((arg (st-pop-any)))
+	(if (unit-psd-start arg)
+	  got
+	  (get-args (cons arg got)))))
+
+(defvar *funcs* (make-hash-table :test 'equal))
+
+(defun call-ext-fun (num args)
+  (let ((fun (gethash num *funcs*)))
+	(if fun
+      (funcall fun args)
+	  (error "ERROR: there is no function numbered ~a~%" num))))
+
+(defun print-units (units)
+  (when units
+	(print (unit-val (car units)))
+	(print-units (cdr units))))
+
+(defmacro def-ext-fun (num &body exp)
+  `(setf (gethash ,num *funcs*) (lambda (args) ,@exp)))
+
+(def-ext-fun 0 (assert (= (length args) 1))
+			   (st-push (make-float (sin (unit-val (first args))))))
+(def-ext-fun 1 (assert (= (length args) 1))
+			   (st-push (make-float (cos (unit-val (first args))))))
+(def-ext-fun 2 (print-units args))
+
+(setf (gethash 2 *funcs*)
+	  (lambda (args) (print-units args)))
+
+
 ;(defvar *cmds* (make-hash-table :test 'equal))
 
 (defmacro defcmd (name args &body body)
@@ -112,16 +156,16 @@
 (defcmd ldcd (const) (st-push (make-float const)))
 (defcmd ldi (shift) (st-push (get-unit shift)));check for integer
 (defcmd ldd (shift) (st-push (get-unit shift)));check for float
-(defcmd ldsi () (st-push (get-unit (unit-val (st-pop :adress)) :expected :integer)));check for adress and integer
-(defcmd ldsd () (st-push (get-unit (unit-val (st-pop :adress)) :expected :float)));check for adress and float
-(defcmd sti () (put-unit (unit-val (st-pop :adress)) (st-pop :integer)));check for adress and integer
-(defcmd std () (put-unit (unit-val (st-pop :adress)) (st-pop :float)));check for adress and float
+(defcmd ldsi () (st-push (get-unit (unit-val (st-pop :address)) :expected :integer)));check for address and integer
+(defcmd ldsd () (st-push (get-unit (unit-val (st-pop :address)) :expected :float)));check for address and float
+(defcmd sti () (put-unit (unit-val (st-pop :address)) (st-pop :integer)));check for address and integer
+(defcmd std () (put-unit (unit-val (st-pop :address)) (st-pop :float)));check for address and float
 (defcmd alloc (size) (reserve size))
-;(defcmd scr () (st-pop))
-(defcmd mai () (put-array (unit-val (st-pop :adress)) :integer (unit-val (st-pop :integer))))
-(defcmd mad () (put-array (unit-val (st-pop :adress)) :float (unit-val (st-pop :integer))))
-(defcmd lda (shift) (st-push (make-adress shift)))
-(defcmd index () (st-push (index-array (unit-val (st-pop :adress)) (unit-val (st-pop :integer)))))
+(defcmd scr () (st-pop-any))
+(defcmd mai () (put-array-head (unit-val (st-pop :address)) :integer (unit-val (st-pop :integer))))
+(defcmd mad () (put-array-head (unit-val (st-pop :address)) :float (unit-val (st-pop :integer))))
+(defcmd lda (shift) (st-push (make-address shift)))
+(defcmd index () (st-push (index-array (unit-val (st-pop :address)) (unit-val (st-pop :integer)))))
 (defcmd addi () (st-push (add (st-pop :integer) (st-pop :integer) :integer))) ;check for integer
 (defcmd addd () (st-push (add (st-pop :float)	(st-pop :float) :float))) ;check for float
 (defcmd subi () (st-push (sub (st-pop :integer) (st-pop :integer) :integer))) ;check for integer
@@ -137,40 +181,13 @@
 (defcmd fi2d () (st-push (make-float (unit-val (st-pop :integer))))) ;check for integer
 (defcmd fd2i () (st-push (make-int (floor (unit-val (st-pop :float)))))) ;check for float
 (defcmd ms () (start-precodure))
-;(defcmd call () )
+(defcmd call () (call-ext-fun (unit-val (st-pop :integer)) (get-args)))
 
 
-(alloc 203)
-(ldci 100)
-(lda 0)
-(mad)
-(lda 201)
-(ldsd)
+(alloc 0)
+(ms)
 (ldci 3)
-(lda 0)
-(index)
-(std)
-
-;(alloc 7)
-;(lda 2)
-;(ldsd)
-;(ldci 56)
-;(ldci 8)
-;(divi)
-
-;(fi2d)
-;(lda 4)
-;(ldsd)
-;(muld)
-;(addd)
-;(lda 0)
-;(std)
-;(ms)
-;(lda 6)
-;(ldsi)
-;(fi2d)
-;(lda 2)
-;(ldsd)
-;(subd)
-;(ldci 1)
-;;(call)
+(ldci 5)
+(addi)
+(ldci 1)
+(call)
