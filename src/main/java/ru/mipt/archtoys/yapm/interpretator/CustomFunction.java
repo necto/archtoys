@@ -14,7 +14,7 @@ public class CustomFunction {
         case 2: 
             String out = "";
             for (int i = 0; i < args.length; ++i)
-                out.concat(String.valueOf((int)args[i]).concat(" "));
+                out += String.valueOf((int)args[i]) + " ";
             
             System.out.println(out);
         default: break;
