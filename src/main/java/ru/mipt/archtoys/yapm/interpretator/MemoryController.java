@@ -10,7 +10,10 @@ package ru.mipt.archtoys.yapm.interpretator;
  */
 public class MemoryController {
     byte[] byteArray = new byte[0x10000];
-    MemoryController() {
+    boolean isShowDump;
+    
+    MemoryController(boolean dump) {
+        isShowDump = dump;
     }
 
     int ReadMemory(int addr) {
@@ -18,7 +21,7 @@ public class MemoryController {
     }
 
     void WriteMemory(int src, int addr) {
-        System.out.println("Write " + String.valueOf(src) + " to addr " + String.valueOf(addr));
+        if (isShowDump) { System.out.println("Write " + String.valueOf(src) + " to addr " + String.valueOf(addr));}
         byteArray[addr] = (byte)src;
     }
 }

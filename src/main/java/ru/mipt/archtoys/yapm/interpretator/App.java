@@ -28,8 +28,8 @@ public class App {
         
         long cycle = 0;
         FunctionalState state = new FunctionalState();
-        MemoryController meu = new MemoryController();
-        Interpretator interpretator = new Interpretator(obj, state, meu);
+        MemoryController meu = new MemoryController(isShowDump);
+        Interpretator interpretator = new Interpretator(obj, state, meu, isShowDump);
         while (interpretator.Clock()) {
             if (isShowDump) {
                 state.Dump(cycle++);

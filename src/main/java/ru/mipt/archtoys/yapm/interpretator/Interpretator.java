@@ -17,8 +17,9 @@ public class Interpretator {
     private MemoryController meu;
     BufferedReader src = null;
     boolean retValue;
+    boolean isShowDump;
     
-    Interpretator(File aSrc, FunctionalState aState, MemoryController aMeu) {
+    Interpretator(File aSrc, FunctionalState aState, MemoryController aMeu, boolean dump) {
         try {
             FileInputStream fin = new FileInputStream(aSrc);
             DataInputStream in = new DataInputStream(fin);
@@ -28,6 +29,7 @@ public class Interpretator {
         }
         state = aState;
         meu = aMeu;
+        isShowDump = dump;
     }
 
     boolean Clock() {
@@ -45,7 +47,7 @@ public class Interpretator {
         } catch (IOException ex) {
             Logger.getLogger(Interpretator.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println(command);
+        if (isShowDump) { System.out.println(command);}
         retValue = command != null;
         return command;
     }

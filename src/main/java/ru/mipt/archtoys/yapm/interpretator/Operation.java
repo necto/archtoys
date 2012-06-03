@@ -96,7 +96,6 @@ public class Operation {
         case CALL:
             operand1 = GetRegNum(split[1]);
             operand2 = GetRegNum(split[2]);
-            operand3 = GetConstant(split[3]);
             break;
         case ADD:
         case SUB:
@@ -147,11 +146,12 @@ public class Operation {
             meu.WriteMemory(state.GetRegister(operand3), operand1 + operand2);
             break;
         case CALL:
-            int argsNum = operand2 - operand1 + 1;
+            int argsNum = (operand2 - operand1) / 2;
             byte[] args = new byte[argsNum];
             for (int i = 0; i < args.length; ++i)
-                args[i] = (byte) meu.ReadMemory(operand1 + i);
-            CustomFunction.Call(args, operand3);
+                args[i] = (byte) meu.ReadMemory(operand1 + i * 2);
+            int index = meu.ReadMemory(operand2);
+            CustomFunction.Call(args, index);
             break;
         case ADD:
             state.SetRegister(operand3, state.GetRegister(operand1) + state.GetRegister(operand2));
