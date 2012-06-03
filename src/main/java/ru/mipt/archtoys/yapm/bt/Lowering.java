@@ -23,12 +23,14 @@ public class Lowering {
 
     private Ir ir;
     private int tosAddr;
+    private int msAddr;
     private int regNum;
 
     public Lowering(Ir i_r) {
         ir = i_r;
         tosAddr = 0;
         regNum = 0;
+        msAddr = -1;
     }
 
     public LinkedList<Operation> runLowering() {
@@ -312,8 +314,8 @@ public class Lowering {
          * Store result to memory
          */
         oper = new Operation("st");
-        oper.args.add(new OpMem(tosAddr - tosIncr * 2));
         oper.args.add(new OpReg(reg2));
+        oper.args.add(new OpMem(tosAddr - tosIncr * 2));
         ir.seq.add(oper);
         /*
          * Correct tos address
@@ -322,23 +324,92 @@ public class Lowering {
     }
 
     private void lowirChs(Instruction instr) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        String chsgnName = instr.defs.toString().substring(0, 3);
+        int tosIncr = getStackOperSize(instr);
+        Operation oper = new Operation("ld");
+        /*
+         * Construct load from 'tos' to register
+         */
+        oper = new Operation("ld");
+        int reg1 = nextReg();
+        oper.args.add(new OpMem(tosAddr - tosIncr));
+        oper.res.add(new OpReg(reg1));
+        ir.seq.add(oper);
+        /*
+         * Construct arithm operation
+         */
+        oper = new Operation(chsgnName);
+        int reg2 = nextReg();
+        oper.args.add(new OpReg(reg1));
+        oper.res.add(new OpReg(reg2));
+        ir.seq.add(oper);
+        /*
+         * Store result to memory
+         */
+        oper = new Operation("st");
+        oper.args.add(new OpReg(reg2));
+        oper.args.add(new OpMem(tosAddr - tosIncr));
+        ir.seq.add(oper);
+        /*
+         * Correct tos address
+         */
+        tosAddr -= 0; // It remains the same
     }
 
     private void lowirConv(Instruction instr) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        String convName = instr.defs.toString().substring(0, 3);
+        int argSize = (convName == "FI2D") ? 2 : 1;
+        int resSize = 3 - argSize;
+        Operation oper = new Operation("ld");
+        /*
+         * Construct load from 'tos' to register
+         */
+        oper = new Operation("ld");
+        int reg1 = nextReg();
+        oper.args.add(new OpMem(tosAddr - argSize));
+        oper.res.add(new OpReg(reg1));
+        ir.seq.add(oper);
+        /*
+         * Construct arithm operation
+         */
+        oper = new Operation(convName);
+        int reg2 = nextReg();
+        oper.args.add(new OpReg(reg1));
+        oper.res.add(new OpReg(reg2));
+        ir.seq.add(oper);
+        /*
+         * Store result to memory
+         */
+        oper = new Operation("st");
+        oper.args.add(new OpReg(reg2));
+        oper.args.add(new OpMem(tosAddr - argSize));
+        ir.seq.add(oper);
+        /*
+         * Correct tos address
+         */
+        tosAddr += resSize - argSize;
     }
 
     private void lowirMs(Instruction instr) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        msAddr = tosAddr;
+        tosAddr += 1;
     }
 
     private void lowirCall(Instruction instr) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        Operation oper = new Operation("call");
+        assert(msAddr != -1);
+        oper.args.add(new OpMem(msAddr + 1));
+        oper.args.add(new OpMem(tosAddr - 1));
+        int procIndex = ((OperInteger)instr.oper).value;
+        oper.args.add(new OpConstInt(procIndex));
+        ir.seq.add(oper);
+        tosAddr = msAddr;
+        msAddr = -1;
     }
 
     private int nextReg() {
-        return regNum++;
+        regNum  = (regNum + 1) % 256;
+        return regNum;
     }
 
     private int getStackOperSize(Instruction instr) {
