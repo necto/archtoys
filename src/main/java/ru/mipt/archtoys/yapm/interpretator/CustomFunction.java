@@ -9,5 +9,15 @@ package ru.mipt.archtoys.yapm.interpretator;
  * @author avlechen
  */
 public class CustomFunction {
-    public static void Call(int descriptor) {}
+    static void Call(byte[] args, int descriptor) {
+        switch(descriptor) {
+        case 2: 
+            String out = "";
+            for (int i = 0; i < args.length; ++i)
+                out.concat(String.valueOf((int)args[i]).concat(" "));
+            
+            System.out.println(out);
+        default: break;
+        }
+    }
 }
