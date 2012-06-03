@@ -51,9 +51,9 @@
 
 (defun index-array (address i)
   (let ((head (get-unit address)))
-	(my-assert (unit-arr-start head) "expecting array in ~a but found ~a" adress head)
+	(my-assert (unit-arr-start head) "expecting array in ~a but found ~a" address head)
 	(my-assert (< -1 i (unit-val head)) "index ~a out of boundaries" i)
-	(make-address (+ address (size head) (* (size (unit-type arr)) i)))))
+	(make-address (+ address (size head) (* (size (unit-type head)) i)))))
 
 (defun get-topmost-less (address)
   (if (eq (unit-type (get-unit address)) :reserved)
@@ -108,7 +108,6 @@
 
 (defun div (a b type)
   (ensure-type a b type "div"
-	(format t "~a /~a~%" a b)
 	(make-unit :type type :val (let ((val (/ (unit-val a) (unit-val b))))
 							     (if (eq type :integer) (floor val) val)))))
 
