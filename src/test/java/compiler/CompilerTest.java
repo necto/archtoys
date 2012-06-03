@@ -37,7 +37,7 @@ public class CompilerTest extends TestCase {
 		Compiler c = new Compiler();
 		assertEquals ("Basic print",
 					  canonize(c.compile("print 2")),
-					  canonize("alloc 0; ms; ldci 2; ldci 1; call;"));
+					  canonize("alloc 0; ms; ldci 2; ldci 2; call;"));
 		assertEquals ("Basic assignment",
 					  canonize(c.compile("i = 2")),
 					  canonize("alloc 1; ldci 2; lda 0; sti;"));
@@ -49,7 +49,7 @@ public class CompilerTest extends TestCase {
 		assertEquals ("Summation ",
 					  canonize(c.compile("print 2 + 2 + 3 - 5")),
 					  canonize("alloc 0; ms; ldci 2; ldci 2; addi; ldci 3;" + 
-							   "addi; ldci 5; subi; ldci 1; call;"));
+							   "addi; ldci 5; subi; ldci 2; call;"));
 		assertEquals ("Multiplication",
 					  canonize(c.compile("i = 15*64/3")),
 					  canonize("alloc 1; ldci 15; ldci 64; muli; ldci 3;" +
@@ -67,7 +67,7 @@ public class CompilerTest extends TestCase {
 					  canonize(c.compile("print i, j, k, a, b, c")),
 					  canonize("alloc 9; ms; lda 0; ldsi; lda 1; ldsi; lda 2;" +
 							   "ldsi; lda 3; ldsd; lda 5; ldsd; lda 7; ldsd;" +
-							   "ldci 1; call;"));
+							   "ldci 2; call;"));
 		assertEquals ("Auto convertion",
 					  canonize(c.compile("i = 2.3 + (5.5 mod 18)")),
 					  canonize("alloc 1; ldcd 2.3; ldcd 5.5; fd2i; ldci 18; rem;" +
@@ -81,13 +81,13 @@ public class CompilerTest extends TestCase {
 					  canonize(c.compile("print f[34] + i[3]")),
 					  canonize("alloc 302; ldci 100; lda 0; mad; ldci 100;"
 						    + "lda 201; mai; ms; ldci 34; lda 0; index; ldsd;"
-						    + "ldci 3; lda 201; index; ldsi; fi2d; addd; ldci 1;"
+						    + "ldci 3; lda 201; index; ldsi; fi2d; addd; ldci 2;"
 						    + " call;"));
 		assertEquals ("Several references",
 					  canonize(c.compile("print a[1], a[0]")),
 					  canonize("alloc 201; ldci 100; lda 0; mad; ms; ldci 1;"
 						    + " lda 0; index; ldsd; ldci 0; lda 0; index; ldsd;"
-						    + " ldci 1; call;"));
+						    + " ldci 2; call;"));
 		assertEquals ("Lvalue reference",
 					  canonize(c.compile("i[2] = 15/4")),
 					  canonize("alloc 101; ldci 100; lda 0; mai; ldci 15;"
@@ -101,7 +101,7 @@ public class CompilerTest extends TestCase {
 						    + " ldsd; ldci 43; ldci 2; divi; ldci 11; ldci 3; divi;"
 						    + " ldci 54; ldci 6; addi; ldci 100; muli; addi;"
 						    + " ldci 100; muli; addi; lda 20001; index; ldsi;"
-						    + " fi2d; muld; ldci 1; call; "));
+						    + " fi2d; muld; ldci 2; call; "));
     }
 //	@Test(expected=MemTable.IncompatibleUsage.class)
 //	public void testDifDefDetector() throws Exception
@@ -123,7 +123,7 @@ public class CompilerTest extends TestCase {
 					  canonize("alloc 204; ldci 100; lda 3; mad; ldci 30;"
 						    + " lda 2; ldsi; muli; ldci 4; subi; fi2d; lda 0;"
 						    + " std; ms; ldci 54; ldci 18; fi2d; ldci 3; lda 3;"
-						    + " index; ldsd; divd; fd2i; ldci 3; rem; ldci 1;"
+						    + " index; ldsd; divd; fd2i; ldci 3; rem; ldci 2;"
 						    + " call;"));
 	}
 }
