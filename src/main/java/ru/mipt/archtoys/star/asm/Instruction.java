@@ -158,7 +158,7 @@ public class Instruction {
         FI2D(0, OperType.NONE),
         FD2I(0, OperType.NONE),
         MS(0, OperType.NONE),
-        CALL(0, OperType.INT);
+        CALL(0, OperType.NONE);
         private int opCode;
         private OperType operType;
 
