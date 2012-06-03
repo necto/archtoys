@@ -58,8 +58,8 @@ public class Lowering {
             case ALLOC:
                 lowirAlloc(instr);
                 break;
-            case MRI:
-            case MRD:
+            case MAI:
+            case MAD:
                 lowirMa(instr);
                 break;
             case SCR:
@@ -349,7 +349,7 @@ public class Lowering {
         case LDI:            
         case LDSI:
         case STI:
-        case MRI:
+        case MAI:
         case ADDI:
         case SUBI:
         case MULI:
@@ -360,7 +360,7 @@ public class Lowering {
         case LDD:            
         case LDSD:
         case STD:
-        case MRD:
+        case MAD:
         case ADDD:
         case SUBD:
         case MULD:
