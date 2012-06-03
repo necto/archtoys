@@ -10,7 +10,9 @@
 
 (defgeneric size (unit)
   (:method ((unit unit))
-    (size (unit-type unit)))
+	(if (unit-arr-start unit)
+	  (size :integer)
+      (size (unit-type unit))))
   (:method ((type symbol))
 	(case type
 	  (:integer 1)
@@ -34,6 +36,12 @@
 
 (defun put-array (adress type length)
   (put-unit adress (make-unit :val length :type type :arr-start t)))
+
+(defun index-array (adress i)
+  (let ((arr (get-unit adress)))
+	(assert (unit-arr-start arr))
+	(assert (< -1 i (unit-val arr)))
+	(make-adress (+ adress 1 (* (size (unit-type arr)) i)))))
 
 ; Stack
 (defvar *stack-top* 0)
@@ -84,7 +92,7 @@
 (defun div (a b type)
   (ensure-type a b type "div"
 	(make-unit :type type :val (let ((val (/ (unit-val a) (unit-val b))))
-							   (if (eq type :integer) (floor val) val)))))
+							     (if (eq type :integer) (floor val) val)))))
 
 (defun rema (a b type)
   (ensure-type a b type "rema"
@@ -110,10 +118,10 @@
 (defcmd std () (put-unit (unit-val (st-pop :adress)) (st-pop :float)));check for adress and float
 (defcmd alloc (size) (reserve size))
 ;(defcmd scr () (st-pop))
-(defcmd mri () (put-array (unit-val (st-pop :adress)) :integer (unit-val (st-pop :integer))))
-(defcmd mrd () (put-array (unit-val (st-pop :adress)) :float (unit-val (st-pop :integer))))
+(defcmd mai () (put-array (unit-val (st-pop :adress)) :integer (unit-val (st-pop :integer))))
+(defcmd mad () (put-array (unit-val (st-pop :adress)) :float (unit-val (st-pop :integer))))
 (defcmd lda (shift) (st-push (make-adress shift)))
-;(defcmd index () )
+(defcmd index () (st-push (index-array (unit-val (st-pop :adress)) (unit-val (st-pop :integer)))))
 (defcmd addi () (st-push (add (st-pop :integer) (st-pop :integer) :integer))) ;check for integer
 (defcmd addd () (st-push (add (st-pop :float)	(st-pop :float) :float))) ;check for float
 (defcmd subi () (st-push (sub (st-pop :integer) (st-pop :integer) :integer))) ;check for integer
