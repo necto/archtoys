@@ -94,7 +94,9 @@ public class Operation {
             operand3 = GetRegNum(split[3]);
             break;
         case CALL:
-            operand1 = GetConstant(split[1]);
+            operand1 = GetRegNum(split[1]);
+            operand2 = GetRegNum(split[2]);
+            operand3 = GetConstant(split[3]);
             break;
         case ADD:
         case SUB:
@@ -145,7 +147,11 @@ public class Operation {
             meu.WriteMemory(state.GetRegister(operand3), operand1 + operand2);
             break;
         case CALL:
-            CustomFunction.Call(operand1);
+            int argsNum = operand2 - operand1 + 1;
+            byte[] args = new byte[argsNum];
+            for (int i = 0; i < args.length; ++i)
+                args[i] = (byte) meu.ReadMemory(operand1 + i);
+            CustomFunction.Call(args, operand3);
             break;
         case ADD:
             state.SetRegister(operand3, state.GetRegister(operand1) + state.GetRegister(operand2));
@@ -170,9 +176,5 @@ public class Operation {
             break;
         default: break;
         }
-    }
-
-    private void Call(int operand1) {
-        throw new UnsupportedOperationException("Not yet implemented");
     }
 }
