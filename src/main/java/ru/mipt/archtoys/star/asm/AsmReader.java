@@ -16,17 +16,8 @@ public class AsmReader {
     private static StreamTokenizer tokenizer = null;
     private static int token = 0;
 
-    public AsmReader(File file) {
-        try {
-            tokenizer = new StreamTokenizer(new FileReader(file));
-            tokenizer.eolIsSignificant(true);
-        } catch (IOException ex) {
-            System.err.println("Caught IOException while init: " + ex.getMessage());
-        }
-    }
-
-    public AsmReader(String s) {
-        tokenizer = new StreamTokenizer(new StringReader(s));
+    public AsmReader(Reader reader) {
+        tokenizer = new StreamTokenizer(reader);
         tokenizer.eolIsSignificant(true);
     }
 

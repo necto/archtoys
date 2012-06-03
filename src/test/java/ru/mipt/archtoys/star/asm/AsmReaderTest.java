@@ -4,6 +4,8 @@
  */
 package ru.mipt.archtoys.star.asm;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.LinkedList;
 import junit.framework.TestCase;
 
@@ -33,7 +35,8 @@ public class AsmReaderTest extends TestCase {
     public void testReadAll() {
         System.out.println("Testing reading assembler");
         String testString = "ldci 2;\n sti;\n index;\n ldcd 1.0;\n";
-        AsmReader instance = new AsmReader(testString);
+        Reader reader = new StringReader(testString);
+        AsmReader instance = new AsmReader(reader);
         LinkedList<Instruction> expResult = new LinkedList<Instruction>();
         LinkedList<Instruction> result = instance.readAll();
         /*

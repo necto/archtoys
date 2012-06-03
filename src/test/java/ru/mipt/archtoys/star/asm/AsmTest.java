@@ -31,11 +31,6 @@ public class AsmTest extends TestCase {
      */
     public void testMain() {
         System.out.println("Testing command line arguments");
-        String[] args = new String[0];
-        try {
-            Asm.main(args);
-        } catch (Error e) {
-            assertEquals("No input file error", "No input file specified", e.getMessage());
-        }
+        // Obsolete
     }
 }
