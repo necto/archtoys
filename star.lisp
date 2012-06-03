@@ -4,6 +4,7 @@
 (defun report (msg &rest args) (apply #'error
 									  (format nil "ERROR(~a):~a" *line* msg) args))
 (defun my-assert (cond msg &rest args) (unless cond (apply report msg args)))
+(shadow 'rem)
 
 ; Memory
 (defvar *memory* (make-array (list (expt 2 16))))
@@ -107,12 +108,12 @@
 
 (defun div (a b type)
   (ensure-type a b type "div"
+	(format t "~a /~a~%" a b)
 	(make-unit :type type :val (let ((val (/ (unit-val a) (unit-val b))))
 							     (if (eq type :integer) (floor val) val)))))
 
 (defun rema (a b type)
-  (ensure-type a b type "rema"
-	(make-unit :type type :val (rem (unit-val a) (unit-val b)))))
+  (make-unit :type type :val (cl:rem (unit-val a) (unit-val b))))
 
 ; Functions
 
@@ -173,8 +174,7 @@
 (defcmd muld () (st-push (mul (st-pop :float)	(st-pop :float) :float))) 
 (defcmd divi () (st-push (div (st-pop :integer) (st-pop :integer) :integer))) 
 (defcmd divd () (st-push (div (st-pop :float)	(st-pop :float) :float))) 
-(defcmd remi () (st-push (rema (st-pop :integer) (st-pop :integer) :integer))) 
-(defcmd remd () (st-push (rema (st-pop :float)	 (st-pop :float) :float))) 
+(defcmd rem () (st-push (rema (st-pop :integer) (st-pop :integer) :integer))) 
 (defcmd chsi () (st-push (make-int (- (unit-val (st-pop :integer)))))) 
 (defcmd chsd () (st-push (make-float (- (unit-val (st-pop :float)))))) 
 (defcmd fi2d () (st-push (make-float (unit-val (st-pop :integer))))) 

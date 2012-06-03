@@ -6,7 +6,6 @@ package ru.mipt.archtoys.star.compiler;
 
 import gramm.analysis.DepthFirstAdapter;
 import gramm.node.*;
-import java.util.List;
 
 /**
  *
@@ -115,39 +114,90 @@ public class CodeGen extends DepthFirstAdapter
         defaultOut(node);
     }
 	
-	@Override
-    public void outASubExpr (ASubExpr node)
+    @Override
+    public void caseASubExpr(ASubExpr node)
     {
-		pushCommand ("sub" + types.getType (node).sign());
-        defaultOut(node);
+        inASubExpr(node);
+        if(node.getFactor() != null)
+        {
+            node.getFactor().apply(this);
+        }
+        if(node.getExpr() != null)
+        {
+            node.getExpr().apply(this);
+        }
+	pushCommand ("sub" + types.getType (node).sign());
+        outASubExpr(node);
     }
 	
-	@Override
-    public void outASumExpr (ASumExpr node)
+    @Override
+    public void caseASumExpr(ASumExpr node)
     {
-		pushCommand ("add" + types.getType (node).sign());
-        defaultOut(node);
+        inASumExpr(node);
+        if(node.getExpr() != null)
+        {
+            node.getExpr().apply(this);
+        }
+        if(node.getPlus() != null)
+        {
+            node.getPlus().apply(this);
+        }
+        if(node.getFactor() != null)
+        {
+            node.getFactor().apply(this);
+        }
+	pushCommand ("add" + types.getType (node).sign());
+        outASumExpr(node);
     }
 	
-	@Override
-    public void outAMulFactor (AMulFactor node)
+    @Override
+    public void caseAMulFactor(AMulFactor node)
     {
-		pushCommand ("mul" + types.getType (node).sign());
-        defaultOut(node);
+        inAMulFactor(node);
+        if(node.getUnit() != null)
+        {
+            node.getUnit().apply(this);
+        }
+        if(node.getFactor() != null)
+        {
+            node.getFactor().apply(this);
+        }
+	pushCommand ("mul" + types.getType (node).sign());
+        outAMulFactor(node);
     }
 	
-	@Override
-    public void outADivFactor (ADivFactor node)
+	    @Override
+    public void caseADivFactor(ADivFactor node)
     {
-		pushCommand ("div" + types.getType (node).sign());
-        defaultOut(node);
+        inADivFactor(node);
+        if(node.getUnit() != null)
+        {
+            node.getUnit().apply(this);
+        }
+        if(node.getFactor() != null)
+        {
+            node.getFactor().apply(this);
+        }
+	pushCommand ("div" + types.getType (node).sign());
+        outADivFactor(node);
     }
 	
-	@Override
-    public void outAModFactor (AModFactor node)
+		
+
+    @Override
+    public void caseAModFactor(AModFactor node)
     {
-		pushCommand ("rem");
-        defaultOut(node);
+        inAModFactor(node);
+        if(node.getUnit() != null)
+        {
+            node.getUnit().apply(this);
+        }
+        if(node.getFactor() != null)
+        {
+            node.getFactor().apply(this);
+        }
+	pushCommand ("rem");
+        outAModFactor(node);
     }
 	
 	@Override
