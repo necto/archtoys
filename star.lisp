@@ -3,7 +3,7 @@
 
 (defun report (msg &rest args) (apply #'error
 									  (format nil "ERROR(~a):~a" *line* msg) args))
-(defun my-assert (cond msg &rest args) (unless cond (apply report msg args)))
+(defun my-assert (cond msg &rest args) (unless cond (apply #'report msg args)))
 (shadow 'rem)
 
 ; Memory
@@ -70,6 +70,7 @@
   (incf *stack-top* (size unit)))
 
 (defun st-pop (expected)
+  (my-assert (> *stack-top* 0) "popping an empty stack")
   (decf *stack-top* (size expected))
   (get-unit *stack-top* :expected expected))
 
@@ -94,31 +95,22 @@
 	(progn ,@body)
 	(report "~s types ~a ~a mismatch ~a" ,name (unit-type ,a) (unit-type ,b) ,type)))
 
-(defun add (a b type)
-  (ensure-type a b type "sub"
-	(make-unit :type type :val (+ (unit-val a) (unit-val b)))))
+(defmacro def-arithm (name action)
+  `(defun ,name (a b type) (ensure-type a b type ,(string-downcase (symbol-name name))
+				      (make-unit :type type :val ,action))))
 
-(defun sub (a b type)
-  (ensure-type a b type "sub"
-	(make-unit :type type :val (- (unit-val a) (unit-val b)))))
-
-(defun mul (a b type)
-  (ensure-type a b type "mul"
-	(make-unit :type type :val (* (unit-val a) (unit-val b)))))
-
-(defun div (a b type)
-  (ensure-type a b type "div"
-	(make-unit :type type :val (let ((val (/ (unit-val a) (unit-val b))))
-							     (if (eq type :integer) (floor val) val)))))
-
-(defun rema (a b type)
-  (make-unit :type type :val (cl:rem (unit-val a) (unit-val b))))
+(def-arithm add (+ (unit-val a) (unit-val b)))
+(def-arithm sub (- (unit-val a) (unit-val b)))
+(def-arithm mul (* (unit-val a) (unit-val b)))
+(def-arithm div (let ((val (/ (unit-val a) (unit-val b))))
+                 (if (eq type :integer) (floor val) val)))
+(def-arithm rema (cl:rem (unit-val a) (unit-val b)))
 
 ; Functions
 
 (defun get-args (&optional got)
+  (my-assert (> *stack-top* 0) "It seems, like you've forgotten to do MS")
   (let ((arg (st-pop-any)))
-	(my-assert (> *stack-top* -1) "It seems, like you've forgotten to do MS")
 	(if (unit-psd-start arg)
 	  got
 	  (get-args (cons arg got)))))
